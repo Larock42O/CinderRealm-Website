@@ -65,6 +65,12 @@
     renderProfile();
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+  // Owner rank: shown with the game crown. Tuesday's /api/web/profile takes
+  // over with server-side rank truth; this is the website-side stand-in.
+  const OWNERS = ['larock420'];
+  function isOwner() { return S.name && OWNERS.indexOf(S.name.toLowerCase()) !== -1; }
+  function rankLabel() { return isOwner() ? 'Owner' : '—'; }
+  function crown() { return isOwner() ? '&#128081; ' : ''; }
 
   // Tradekeep stopgap: link a live market feed on demand. Needs a fresh
   // token (right after login); Tuesday's HTTP market API replaces this.
@@ -97,13 +103,13 @@
       el.innerHTML =
         '<div class="pwrap">' +
           '<button class="pchip" data-act="profile" aria-haspopup="true">' +
-            '<span class="pname">' + esc(S.name) + '</span>' +
+            '<span class="pname">' + crown() + esc(S.name) + '</span>' +
             '<span class="plvl">Lvl —</span>' +
             '<span class="pcaret">▾</span>' +
           '</button>' +
           '<div class="pmenu" hidden>' +
             '<div class="prow"><span>Status</span><b>On the site</b></div>' +
-            '<div class="prow"><span>Donation tier</span><b>—</b></div>' +
+            '<div class="prow"><span>Donation tier</span><b>' + rankLabel() + '</b></div>' +
             '<a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a>' +
             '<button data-act="logout">Log out</button>' +
           '</div>' +
