@@ -38,7 +38,7 @@
   <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
   <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
 </footer>
-<script src="js/common.js?v=3"></script>
+<script src="js/common.js?v=4"></script>
 <script>
 (function () {
   const gate = document.getElementById('tk-gate');
@@ -48,13 +48,11 @@
     const on = Cinder.authed;
     gate.style.display = on ? 'none' : '';
     live.style.display = on ? '' : 'none';
-    if (on && !Cinder.live) {
+    if (on) {
       results.innerHTML = '<p class="status">Linking to the Tradekeep…</p>';
-      Cinder.connect()
+      Cinder.linkMarket()
         .then(() => Cinder.send({ t: 'bourse_open' }))
-        .catch(() => { results.innerHTML = '<p class="status">Could not reach the Tradekeep. Your session may have expired — try logging in again.</p>'; });
-    } else if (on) {
-      Cinder.send({ t: 'bourse_open' });
+        .catch(() => { results.innerHTML = '<p class="status">Market link expired — log in again on the <a href="login.html">login page</a>, then return here.</p>'; });
     }
   }
   new MutationObserver(refresh).observe(document.querySelector('[data-profile]'), { childList: true, subtree: true });
