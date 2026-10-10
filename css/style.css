@@ -41,9 +41,11 @@ a:hover { color: #fff; }
   border-bottom: 3px double var(--gold-dim);
   padding: 18px 20px 4px;
 }
-.masthead .logoimg img { height: 76px; width: auto; display: block;
+.masthead { text-align: center; }
+.masthead .logoimg img { height: 81px; width: auto; display: block; margin: 0 auto;
   filter: drop-shadow(0 0 14px rgba(255,122,26,0.3)); }
 .masthead .logoimg { display: inline-block; padding: 8px 0 10px; }
+.masthead nav.bar { justify-content: center; }
 nav.bar {
   display: flex; gap: 2px; margin-top: 12px; flex-wrap: wrap;
 }
