@@ -114,7 +114,7 @@
   </div>
   <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG. No download required.</div>
 </footer>
-<script src="js/common.js?v=4"></script>
+<script src="js/common.js?v=5"></script>
 <script>
 (function () {
   const el = document.getElementById('srv-status');
@@ -122,14 +122,19 @@
   function up() {
     el.innerHTML = '<b style="color:#8fce7f">● Servers up</b> <span style="font-size:12px">— the realm is burning.</span>';
   }
+  function waking() {
+    el.innerHTML = '<b style="color:#e0b45c">● Waking the realm…</b> <span style="font-size:12px">— the Forge stirs. Give it a moment.</span>';
+  }
   function down() {
     el.innerHTML = '<b style="color:#ff9a9a">● Servers down</b> <span style="font-size:12px">— the Forge gutters. Check back soon.</span>';
   }
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 15000);
+  // The free tier sleeps and takes ~50–90s to wake; don't call it dead too soon.
+  const warnTimer = setTimeout(() => waking(), 10000);
+  const killTimer = setTimeout(() => ctrl.abort(), 120000);
   fetch('https://cinderrealm.onrender.com/', { mode: 'no-cors', signal: ctrl.signal })
-    .then(() => { clearTimeout(timer); up(); })
-    .catch(() => { clearTimeout(timer); down(); });
+    .then(() => { clearTimeout(warnTimer); clearTimeout(killTimer); up(); })
+    .catch(() => { clearTimeout(warnTimer); clearTimeout(killTimer); down(); });
 })();
 </script>
 </body>
