@@ -22,24 +22,29 @@
     <div class="body">
       <p>Cinderrealm is built by players, for players — no publishers, no investors, just the realm. Donations pay for the servers, the domain, and the long nights of development. Every coin goes back into Dunmere.</p>
       <p>Once the realm is fully established, donations end and a <b>members world</b> opens instead — with new skills, quests, monsters, and regions for supporters. Until then, your generosity is what keeps the Forge lit.</p>
-      <p class="status" style="border:1px dashed var(--gold-dim);border-radius:4px;padding:10px 12px"><b style="color:var(--gold-hi)">Important:</b> put your <b>character name</b> in the PayPal note/message field when you donate, so your tier and perks can be granted in-game.</p>
+      <div class="donor-name-row">
+        <label for="donor-name"><b style="color:var(--gold-hi)">Your character name</b> <span class="status">(required — this is how your tier gets granted in-game)</span></label>
+        <input id="donor-name" type="text" maxlength="24" placeholder="e.g. Larock" autocomplete="off">
+        <p class="status err" id="donor-name-err" style="display:none">Enter your character name first.</p>
+      </div>
       <div class="tiers">
         <div class="tier">
           <h3>Sparkkeeper</h3><div class="amt">$5</div>
           <ul><li>Supporter badge on the site</li><li>Our eternal thanks</li></ul>
-          <a class="btn" href="https://www.paypal.com/ncp/payment/8BNGWT8LASV2W" target="_blank" rel="noopener">Donate $5</a>
+          <div id="pp-sparkkeeper" class="ppbtn"></div>
         </div>
         <div class="tier featured">
           <h3>Flamebearer</h3><div class="amt">$15</div>
           <ul><li>Supporter badge on the site</li><li>Name on the Founders' Wall</li><li>Vote weight in polls ×2</li></ul>
-          <a class="btn" href="https://www.paypal.com/ncp/payment/8AH7D842427H2" target="_blank" rel="noopener">Donate $15</a>
+          <div id="pp-flamebearer" class="ppbtn"></div>
         </div>
         <div class="tier">
           <h3>Forge Patron</h3><div class="amt">$30</div>
           <ul><li>Everything in Flamebearer</li><li>Early access to test builds</li><li>A say in the members-world roadmap</li></ul>
-          <a class="btn" href="https://www.paypal.com/ncp/payment/3WRKUFDFA3JYJ" target="_blank" rel="noopener">Donate $30</a>
+          <div id="pp-forgepatron" class="ppbtn"></div>
         </div>
       </div>
+      <p class="status" id="donate-done" style="display:none;margin-top:10px"></p>
     </div>
   </div>
   <div class="panel">
@@ -54,21 +59,65 @@
   <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
 </footer>
 <script src="js/common.js?v=5"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=AavSvxc7EVM2wjIIRixfLktaRCL5tx4ipmP5a4EdsInzLMrmz-U5-57taC2xuCzhPtVw5xKJAVQkXRPa&currency=USD&intent=capture"></script>
 <script>
-// Wire DONATE_URL to the payment link (Ko-fi / PayPal / etc.) once Jacob sets it up.
+/* PayPal checkout: donor must enter their character name; it is attached to
+ * the order as custom_id so Jacob can match every payment to a character in
+ * his PayPal dashboard. Client ID is publishable (safe in page source). */
 (function () {
-  const DONATE_URL = '';
-  document.querySelectorAll('[data-donate]').forEach((b) => {
-    b.addEventListener('click', () => {
-      if (DONATE_URL) { window.open(DONATE_URL, '_blank', 'noopener'); }
-      else {
-        const n = document.getElementById('donate-note');
-        n.style.display = '';
-        n.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
+  const TIERS = [
+    { el: 'pp-sparkkeeper', name: 'Sparkkeeper',  amount: '5.00'  },
+    { el: 'pp-flamebearer', name: 'Flamebearer',  amount: '15.00' },
+    { el: 'pp-forgepatron', name: 'Forge Patron', amount: '30.00' },
+  ];
+  function charName() {
+    const v = document.getElementById('donor-name').value.trim();
+    const err = document.getElementById('donor-name-err');
+    if (!v) { err.style.display = ''; return null; }
+    err.style.display = 'none';
+    return v;
+  }
+  document.getElementById('donor-name').addEventListener('input', () => {
+    document.getElementById('donor-name-err').style.display = 'none';
   });
-  if (DONATE_URL) document.getElementById('donate-note').style.display = 'none';
+  // prefill from the website profile when logged in
+  if (window.Cinder && Cinder.name) {
+    const inp = document.getElementById('donor-name');
+    if (inp && !inp.value) inp.value = Cinder.name;
+  }
+  if (!window.paypal) return;
+  TIERS.forEach((t) => {
+    paypal.Buttons({
+      style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'donate' },
+      createOrder: function (data, actions) {
+        const name = charName();
+        if (!name) return Promise.reject(new Error('name required'));
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: t.amount, currency_code: 'USD' },
+            custom_id: name.slice(0, 127),
+            description: 'Cinderrealm donation — ' + t.name + ' tier (character: ' + name + ')',
+          }],
+        });
+      },
+      onApprove: function (data, actions) {
+        return actions.order.capture().then(function (details) {
+          const name = charName() || 'hero';
+          const done = document.getElementById('donate-done');
+          done.style.display = '';
+          done.innerHTML = 'Thank you, <b style="color:var(--gold-hi)">' + Cinder.esc(name) +
+            '</b> — your <b>' + t.name + '</b> tier is recorded and will be granted in-game.';
+          done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          try { localStorage.setItem('cinder_donation', JSON.stringify({ tier: t.name, amount: t.amount, name, at: Date.now() })); } catch (e) {}
+        });
+      },
+      onError: function () {
+        const done = document.getElementById('donate-done');
+        done.style.display = '';
+        done.textContent = 'Something went wrong with PayPal — please try again.';
+      },
+    }).render('#' + t.el);
+  });
 })();
 </script>
 </body>
