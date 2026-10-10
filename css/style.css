@@ -224,3 +224,13 @@ footer a:hover { color: var(--gold-hi); }
   display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
 .music-btn:hover { border-color: var(--gold-hi); }
 .music-btn.off { color: var(--parch-dim); border-color: var(--line); text-decoration: line-through; }
+
+/* donate: character name + paypal buttons */
+.donor-name-row { margin: 14px 0 4px; }
+.donor-name-row label { display: block; margin-bottom: 6px; font-size: 14px; }
+.donor-name-row input { width: 100%; max-width: 340px; padding: 10px 12px; font-size: 15px;
+  background: #0d0906; border: 1px solid var(--gold-dim); border-radius: 4px; color: var(--parch);
+  font-family: inherit; }
+.donor-name-row input:focus { outline: none; border-color: var(--gold-hi); }
+.ppbtn { margin-top: 10px; min-height: 45px; }
+.ppbtn iframe { border-radius: 4px; }
