@@ -42,7 +42,7 @@ a:hover { color: #fff; }
   padding: 18px 20px 4px;
 }
 .masthead { text-align: center; }
-.masthead .logoimg img { height: 128px; width: auto; max-width: 92vw; display: block; margin: 0 auto; }
+.masthead .logoimg img { height: 110px; width: auto; max-width: 100%; display: block; flex-shrink: 1; }
 .masthead .logoimg { display: flex; justify-content: center; align-items: center; padding: 18px 10px; margin: 0 auto; max-width: 860px;
   border: 1px solid var(--gold-dim);
   outline: 3px double var(--gold-dim);
