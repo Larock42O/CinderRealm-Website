@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" font-family="Georgia, serif">
+  <defs>
+    <radialGradient id="sea" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#232f3d"/><stop offset="100%" stop-color="#131a23"/>
+    </radialGradient>
+    <radialGradient id="land" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#d6c193"/><stop offset="100%" stop-color="#b39a67"/>
+    </radialGradient>
+    <linearGradient id="ice" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bfe3ee" stop-opacity="0.85"/><stop offset="100%" stop-color="#bfe3ee" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="9"/></filter>
+  </defs>
+
+  <rect width="800" height="620" fill="url(#sea)"/>
+  <!-- wave marks -->
+  <g stroke="#3a4c60" stroke-width="1.4" fill="none" opacity="0.7">
+    <path d="M60 480 q10 -8 20 0 q10 8 20 0"/><path d="M700 120 q10 -8 20 0 q10 8 20 0"/>
+    <path d="M90 540 q10 -8 20 0 q10 8 20 0"/><path d="M660 560 q10 -8 20 0 q10 8 20 0"/>
+    <path d="M40 300 q10 -8 20 0 q10 8 20 0"/><path d="M740 420 q10 -8 20 0 q10 8 20 0"/>
+  </g>
+
+  <!-- continent -->
+  <path filter="url(#rough)" fill="url(#land)" stroke="#6e5a34" stroke-width="2.5" d="
+    M150 90
+    C190 60, 260 55, 320 70 C360 55, 430 60, 470 80
+    C530 60, 600 70, 640 100 C690 110, 720 160, 710 210
+    C740 250, 730 300, 700 330 C720 370, 700 420, 660 440
+    C670 490, 640 540, 590 560 C540 590, 470 585, 420 565
+    C360 590, 280 585, 230 555 C180 570, 130 540, 120 490
+    C90 460, 85 410, 105 370 C85 330, 95 280, 120 250
+    C105 200, 115 140, 150 90 Z"/>
+
+  <!-- outlands ice -->
+  <path d="M150 90 C190 60, 260 55, 320 70 C360 55, 430 60, 470 80 C530 60, 600 70, 640 100 L640 150 C500 165, 300 160, 150 140 Z"
+        fill="url(#ice)" opacity="0.9"/>
+  <path d="M150 140 C300 160, 500 165, 640 150" stroke="#7fb8cc" stroke-width="1.5" stroke-dasharray="6 4" fill="none"/>
+
+  <!-- Saltmere Isle -->
+  <ellipse cx="70" cy="230" rx="34" ry="26" fill="#c4ab74" stroke="#6e5a34" stroke-width="2" filter="url(#rough)"/>
+  <text x="70" y="290" text-anchor="middle" font-size="12" font-style="italic" fill="#9fc3d4">Saltmere Isle</text>
+
+  <!-- region markers -->
+  <g font-size="12" fill="#3a2c14" text-anchor="middle">
+    <!-- outlands -->
+    <text x="395" y="105" font-size="15" font-weight="bold" fill="#2a4a5a" letter-spacing="3">THE OUTLANDS</text>
+    <text x="395" y="122" font-size="10" fill="#a02323" font-weight="bold">⚔ PvP — full loot ⚔</text>
+    <!-- frosthollow -->
+    <circle cx="300" cy="180" r="4" fill="#3a2c14"/><text x="300" y="198">Frosthollow Hills</text>
+    <!-- whiteguard -->
+    <circle cx="170" cy="270" r="4" fill="#3a2c14"/><text x="170" y="288">Whiteguard Keep</text>
+    <!-- gnome -->
+    <circle cx="170" cy="380" r="4" fill="#3a2c14"/><text x="170" y="398">Gnome Village</text>
+    <!-- thornhollow -->
+    <circle cx="320" cy="290" r="4" fill="#3a2c14"/><text x="320" y="308">Thornhollow</text>
+    <!-- emberhold -->
+    <circle cx="410" cy="340" r="5" fill="#8b1e1e"/><text x="410" y="360" font-weight="bold" font-size="13">Emberhold</text>
+    <!-- ironspire -->
+    <circle cx="515" cy="315" r="5" fill="#8b1e1e"/><text x="515" y="335" font-weight="bold" font-size="13">Ironspire City</text>
+    <!-- kilnmarch -->
+    <circle cx="650" cy="285" r="4" fill="#3a2c14"/><text x="650" y="303">Kilnmarch</text>
+    <!-- highcrest -->
+    <circle cx="690" cy="380" r="4" fill="#3a2c14"/><text x="688" y="400">Highcrest Castle</text>
+    <!-- sunfall -->
+    <circle cx="545" cy="455" r="4" fill="#3a2c14"/><text x="545" y="473">Sunfall Desert</text>
+    <!-- mosswick -->
+    <circle cx="600" cy="495" r="4" fill="#3a2c14"/><text x="600" y="513">Mosswick</text>
+    <!-- gloamfen -->
+    <circle cx="505" cy="530" r="4" fill="#3a2c14"/><text x="505" y="548">Gloamfen</text>
+    <!-- oasis -->
+    <circle cx="650" cy="555" r="4" fill="#2a6a8a"/><text x="650" y="573" font-style="italic">Oasis</text>
+    <!-- dungeons -->
+    <text x="668" y="410" font-size="11">⚔ <tspan font-size="10">Highcrest Cellars</tspan></text>
+    <text x="360" y="470" font-size="11">⚔ <tspan font-size="10">Briar Hollow</tspan></text>
+    <text x="440" y="420" font-size="11">⚔ <tspan font-size="10">Goliath's Vault</tspan></text>
+  </g>
+
+  <!-- rivers -->
+  <path d="M420 360 C450 420, 480 470, 505 525" stroke="#4a7a9a" stroke-width="2" fill="none" opacity="0.7"/>
+  <text x="478" y="455" font-size="9" font-style="italic" fill="#4a6a7a" transform="rotate(68 478 455)">Murkwater R.</text>
+  <ellipse cx="470" cy="500" rx="26" ry="14" fill="#4a7a9a" opacity="0.5"/>
+  <text x="470" y="503" font-size="8" font-style="italic" fill="#dfe9ee" text-anchor="middle">Stillwater L.</text>
+
+  <!-- compass -->
+  <g transform="translate(735,70)" opacity="0.85">
+    <circle r="24" fill="none" stroke="#c9a227" stroke-width="1.5"/>
+    <path d="M0 -18 L5 5 L0 0 L-5 5 Z" fill="#c9a227"/>
+    <text y="-28" text-anchor="middle" font-size="11" fill="#c9a227">N</text>
+  </g>
+
+  <!-- cartouche -->
+  <g>
+    <rect x="270" y="8" width="260" height="34" rx="4" fill="#14100a" opacity="0.85" stroke="#c9a227"/>
+    <text x="400" y="31" text-anchor="middle" font-size="19" letter-spacing="6" fill="#c9a227">DUNMERE</text>
+  </g>
+  <text x="400" y="610" text-anchor="middle" font-size="10" font-style="italic" fill="#7a8a99">The frozen abyssal ocean surrounds all — only the Outlands know PvP.</text>
+</svg>
