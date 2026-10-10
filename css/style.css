@@ -182,3 +182,23 @@ footer a:hover { color: var(--gold-hi); }
 .heat { display: flex; align-items: center; gap: 8px; }
 .heat .bar { width: 120px; height: 8px; background: #1c1a14; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
 .heat .bar i { display: block; height: 100%; width: 99.8%; background: linear-gradient(90deg, #7a3410, var(--ember)); }
+
+/* profile chip (top-right) */
+.pwrap { position: relative; }
+.pchip { display: flex; align-items: center; gap: 8px; background: #171008; border: 1px solid var(--gold-dim);
+  border-radius: 20px; padding: 4px 12px 4px 8px; cursor: pointer; color: var(--parch); font-family: inherit; font-size: 12px; }
+.pchip:hover { border-color: var(--gold-hi); }
+.pdot { width: 8px; height: 8px; border-radius: 50%; background: #6b5a3a; display: inline-block; }
+.pdot.on { background: #8fce7f; box-shadow: 0 0 6px #8fce7f; }
+.pname { font-weight: 700; color: var(--gold-hi); }
+.plvl { color: var(--parch-dim); }
+.pcaret { color: var(--gold-dim); font-size: 10px; }
+.pmenu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 210px; background: #100b06;
+  border: 1px solid var(--gold-dim); border-radius: 6px; padding: 8px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,.6); }
+.pmenu .prow { display: flex; justify-content: space-between; padding: 6px 8px; font-size: 12px; color: var(--parch-dim); }
+.pmenu .prow b { color: var(--parch); font-weight: 600; }
+.pmenu a, .pmenu button { display: block; width: 100%; text-align: left; margin-top: 4px; padding: 8px 10px;
+  border-radius: 4px; font-size: 13px; }
+.pmenu a { background: var(--gold-dim); color: #0d0906; font-weight: 700; text-align: center; }
+.pmenu button { background: transparent; border: 1px solid var(--line); color: var(--parch-dim); cursor: pointer; font-family: inherit; }
+.pmenu button:hover { border-color: var(--gold-dim); color: var(--parch); }
