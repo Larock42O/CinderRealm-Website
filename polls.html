@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polls — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span class="online">Your voice shapes the realm</span></div>
+<div class="masthead">
+  <a class="logo" href="index.html">Cinderrealm<small>World of Dunmere</small></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="polls.html" class="active">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel">
+    <h2>Realm Polls</h2>
+    <div class="body">
+      <p>The community steers the Forge. Vote in open polls — results are tallied live and the winning choice guides development.</p>
+      <div id="polls"></div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js"></script>
+<script>
+(function () {
+  const POLLS = [
+    { id: 'p1', q: 'Which region should get the next new quest?',
+      opts: ['The Outlands', 'Sunfall Desert', 'The Gloamfen', 'Highcrest Castle'] },
+    { id: 'p2', q: 'Where should the third Tradekeep open?',
+      opts: ['Whiteguard Keep', 'Thornhollow', 'Mosswick', 'Keep it to two for now'] },
+    { id: 'p3', q: 'What should the next weapon special attack be?',
+      opts: ['Frostbite Cleave (ice damage + slow)', 'Ember Chain (hits jump between foes)', 'Stoneskin Slam (damage + brief shield)', 'Ashen Veil (brief invisibility)'] },
+  ];
+  const box = document.getElementById('polls');
+  function votes(id) {
+    try { return JSON.parse(localStorage.getItem('cinder_poll_' + id) || 'null'); } catch (e) { return null; }
+  }
+  // Community tallies go live with the server-backed poll API (coming with the next realm update).
+  // Until then each hero sees their own vote, saved on this device.
+  function render() {
+    box.innerHTML = POLLS.map((p) => {
+      const v = votes(p.id);
+      const opts = p.opts.map((o, i) => {
+        if (v === null) {
+          return '<label data-poll="' + p.id + '" data-opt="' + i + '"><span class="opt"><input type="radio" name="' + p.id + '"> ' + Cinder.esc(o) + '</span></label>';
+        }
+        const mine = v === i;
+        return '<div class="poll ' + (mine ? 'voted' : '') + '" style="border:none;padding:4px 8px">' +
+          '<span class="opt">' + (mine ? '✔ ' : '') + Cinder.esc(o) + '</span></div>';
+      }).join('');
+      const foot = v === null
+        ? '<button class="btn" data-vote="' + p.id + '" style="margin-top:8px">Vote</button>'
+        : '<p class="status" style="margin-top:8px">Vote recorded. Realm-wide tallies go live with the next update.</p>';
+      return '<div class="poll"><h3>' + Cinder.esc(p.q) + '</h3>' + opts + foot + '</div>';
+    }).join('');
+  }
+  box.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-vote]'); if (!b) return;
+    const id = b.dataset.vote;
+    const sel = box.querySelector('input[name="' + id + '"]:checked');
+    if (!sel) return;
+    const label = sel.closest('label');
+    localStorage.setItem('cinder_poll_' + id, label.dataset.opt);
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
