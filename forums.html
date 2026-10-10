@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forums — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.forum-cat { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); }
+.forum-cat:last-child { border-bottom:none; }
+.forum-cat h3 { font-size:15px; margin-bottom:3px; }
+.forum-cat h3 a { color:var(--gold-hi); text-decoration:none; }
+.forum-cat p { font-size:12px; color:var(--parch-dim); margin:0; }
+.forum-cat .counts { font-size:11px; color:var(--parch-dim); text-align:right; white-space:nowrap; }
+.thread { padding:10px 14px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:10px; }
+.thread:last-child { border-bottom:none; }
+.thread a.t { color:var(--parch); text-decoration:none; font-size:14px; }
+.thread a.t:hover { color:var(--gold-hi); }
+.thread .by { font-size:11px; color:var(--parch-dim); }
+.post { border-bottom:1px solid var(--line); padding:12px 14px; display:flex; gap:12px; }
+.post:last-child { border-bottom:none; }
+.post .who { width:130px; flex-shrink:0; font-size:12px; }
+.post .who b { color:var(--gold-hi); display:block; font-size:13px; }
+.post .who .mod { color:var(--ember); font-size:10px; font-variant:small-caps; letter-spacing:1px; }
+.post .what { flex:1; font-size:13px; line-height:1.65; color:#c9bd97; }
+.post .when { font-size:10px; color:var(--parch-dim); margin-top:6px; }
+textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px solid var(--line);
+  color:var(--parch); padding:8px 10px; border-radius:3px; font-family:inherit; font-size:13px; }
+.forum-rules { font-size:12px; color:var(--parch-dim); line-height:1.7; }
+.forum-rules b { color:var(--gold-hi); }
+.crumb { font-size:12px; color:var(--parch-dim); margin-bottom:10px; }
+.crumb a { color:var(--parch-dim); }
+</style>
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span class="online">The realm gathers</span></div>
+<div class="masthead">
+  <a class="logo" href="index.html">Cinderrealm<small>World of Dunmere</small></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="forums.html" class="active">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel">
+    <h2 id="forum-title">Realm Forums</h2>
+    <div class="body" style="padding:0">
+      <div id="forum-view"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Forum Law</h3>
+    <div class="body forum-rules">
+      <b>No profanity.</b> <b>No derogatory language or slurs.</b> <b>No sexual content or innuendo.</b>
+      Keep it civil, keep it on-topic, no cheat or exploit discussion, no real-world trading.
+      The forums are moderated — posts breaking the law are removed, repeat offenders lose posting rights.
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js"></script>
+<script>
+/* Forums — UI live now; thread/post storage arrives with the server forum API (next update).
+   API contract: GET /api/forums/categories | GET /api/forums/category/:id
+   GET /api/forums/thread/:id | POST /api/forums/thread | POST /api/forums/thread/:id/reply */
+(function () {
+  const API = 'https://cinderrealm.onrender.com';
+  const view = document.getElementById('forum-view');
+  const title = document.getElementById('forum-title');
+  const CATS = [
+    { id: 'general', name: 'General Discussion', desc: 'Talk of the realm — adventures, stories, and tavern chatter.' },
+    { id: 'help', name: 'Help & Guides', desc: 'New hero? Ask here. Veteran? Share your wisdom.' },
+    { id: 'trade', name: 'Trading Post', desc: 'Arrange trades beyond the Tradekeep ledgers.' },
+    { id: 'clans', name: 'Clans & Fellowships', desc: 'Recruit for your company or find one to join.' },
+    { id: 'offtopic', name: 'The Cold Hearth', desc: 'Off-topic — keep it civil, keep it clean.' },
+  ];
+  const q = new URLSearchParams(location.search);
+  const cat = q.get('cat'), thread = q.get('thread');
+
+  function esc(s) { return Cinder.esc(s); }
+  function needLogin() {
+    view.innerHTML = '<div class="notice" style="margin:14px">Log in with your game account to join the discussion.</div>';
+  }
+  async function get(path) {
+    const r = await fetch(API + path);
+    if (!r.ok) throw 0;
+    return r.json();
+  }
+  async function post(path, body) {
+    // Authed forum posts ride the game WebSocket session once the API is live.
+    const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ token: (window.CinderSession || {}).token }, body)) });
+    if (!r.ok) throw 0;
+    return r.json();
+  }
+
+  async function showIndex() {
+    title.textContent = 'Realm Forums';
+    try {
+      const data = await get('/api/forums/categories');
+      view.innerHTML = data.map((c) =>
+        '<div class="forum-cat"><div><h3><a href="forums.html?cat=' + c.id + '">' + esc(c.name) + '</a></h3><p>' + esc(c.desc || '') + '</p></div>' +
+        '<div class="counts">' + (c.threads || 0) + ' threads<br>' + (c.posts || 0) + ' posts</div></div>').join('');
+    } catch (e) {
+      view.innerHTML = CATS.map((c) =>
+        '<div class="forum-cat"><div><h3><a href="forums.html?cat=' + c.id + '">' + esc(c.name) + '</a></h3><p>' + esc(c.desc) + '</p></div>' +
+        '<div class="counts">— threads<br>— posts</div></div>').join('') +
+        '<div class="notice" style="margin:14px">The forum halls are being built — threads open with the next server update.</div>';
+    }
+  }
+  async function showCat(id) {
+    const c = CATS.find((x) => x.id === id) || { name: 'Forum' };
+    title.textContent = c.name;
+    let html = '<div class="crumb" style="padding:12px 14px 0"><a href="forums.html">Forums</a> → ' + esc(c.name) + '</div>';
+    try {
+      const data = await get('/api/forums/category/' + encodeURIComponent(id));
+      html += (data.threads || []).map((t) =>
+        '<div class="thread"><div><a class="t" href="forums.html?thread=' + t.id + '">' + esc(t.title) + '</a>' +
+        '<div class="by">by ' + esc(t.author) + ' · ' + (t.replies || 0) + ' replies</div></div>' +
+        '<div class="by">' + esc(t.lastpost || '') + '</div></div>').join('') || '<div class="notice" style="margin:14px">No threads yet — start the first.</div>';
+    } catch (e) {
+      html += '<div class="notice" style="margin:14px">Threads open with the next server update.</div>';
+    }
+    html += '<div style="padding:14px"><button class="btn" id="newthread">Start New Thread</button></div>';
+    view.innerHTML = html;
+    const b = document.getElementById('newthread');
+    if (b) b.addEventListener('click', () => {
+      if (!Cinder.authed) { needLogin(); return; }
+      const t = prompt('Thread title:');
+      if (!t) return;
+      const body = prompt('Opening post:');
+      if (body === null) return;
+      post('/api/forums/thread', { category: id, title: t, body })
+        .then((r) => { location.href = 'forums.html?thread=' + r.id; })
+        .catch(() => alert('The forum halls are still being built — try again after the next server update.'));
+    });
+  }
+  async function showThread(id) {
+    title.textContent = 'Thread';
+    let html = '<div class="crumb" style="padding:12px 14px 0"><a href="forums.html">Forums</a> → Thread</div><div id="posts"></div>';
+    html += '<div style="padding:14px"><textarea class="forum" id="replybox" placeholder="Write your reply…"></textarea>' +
+      '<div style="margin-top:8px"><button class="btn" id="sendreply">Post Reply</button></div></div>';
+    view.innerHTML = html;
+    try {
+      const data = await get('/api/forums/thread/' + encodeURIComponent(id));
+      title.textContent = data.title || 'Thread';
+      document.getElementById('posts').innerHTML = (data.posts || []).map((p) =>
+        '<div class="post"><div class="who"><b>' + esc(p.author) + '</b>' + (p.moderator ? '<span class="mod">♛ Moderator</span>' : '') +
+        '</div><div class="what">' + esc(p.body).replace(/\n/g, '<br>') + '<div class="when">' + esc(p.created || '') + '</div></div></div>').join('');
+    } catch (e) {
+      document.getElementById('posts').innerHTML = '<div class="notice" style="margin:14px">Posts load with the next server update.</div>';
+    }
+    document.getElementById('sendreply').addEventListener('click', () => {
+      if (!Cinder.authed) { needLogin(); return; }
+      const body = document.getElementById('replybox').value.trim();
+      if (!body) return;
+      post('/api/forums/thread/' + encodeURIComponent(id) + '/reply', { body })
+        .then(() => location.reload())
+        .catch(() => alert('The forum halls are still being built — try again after the next server update.'));
+    });
+  }
+  if (thread) showThread(thread);
+  else if (cat) showCat(cat);
+  else showIndex();
+})();
+</script>
+</body>
+</html>
