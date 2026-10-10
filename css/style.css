@@ -41,11 +41,9 @@ a:hover { color: #fff; }
   border-bottom: 3px double var(--gold-dim);
   padding: 14px 16px 0;
 }
-.masthead .logo {
-  color: var(--gold); font-size: 34px; letter-spacing: 4px; font-variant: small-caps;
-  text-decoration: none; text-shadow: 0 0 18px rgba(255,122,26,0.35), 0 2px 3px #000;
-}
-.masthead .logo small { display: block; font-size: 12px; letter-spacing: 6px; color: var(--parch-dim); font-variant: normal; }
+.masthead .logoimg img { height: 62px; width: auto; display: block;
+  filter: drop-shadow(0 0 12px rgba(255,122,26,0.3)); }
+.masthead .logoimg { display: inline-block; padding: 2px 0 6px; }
 nav.bar {
   display: flex; gap: 2px; margin-top: 12px; flex-wrap: wrap;
 }
