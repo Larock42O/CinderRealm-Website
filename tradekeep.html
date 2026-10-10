@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tradekeep — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="embers"></canvas>
+<header class="site">
+  <a class="brand" href="index.html"><span class="crown">♛</span> Cinderrealm</a>
+  <nav class="main">
+    <a href="index.html">World</a>
+    <a href="hiscores.html">High Scores</a>
+    <a href="tradekeep.html" class="active">Tradekeep</a>
+    <a href="rules.html">Rules</a>
+  </nav>
+  <div class="loginbox" data-login-ui></div>
+</header>
+<main>
+  <section class="block">
+    <h2>The Tradekeep</h2>
+    <p class="sec-sub">The player-driven order-book marketplace of Dunmere</p>
+    <div class="card glow">
+      <div id="tk-gate">
+        <p style="line-height:1.7;margin-bottom:1rem">Live market data requires a hero's seal. Log in with your game account above to query the Tradekeep ledgers.</p>
+      </div>
+      <div id="tk-live" style="display:none">
+        <div class="searchrow">
+          <input type="text" id="tk-q" placeholder="Search the ledgers… (e.g. rune sword)">
+          <button class="btn" id="tk-search">Search</button>
+        </div>
+        <div id="tk-results"><p class="status">Enter a search to query live market data.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>How it works</h3>
+      <p style="line-height:1.8;color:#d8cdb2">Clerks in Ironspire City and Sunfall record every offer posted by players. Buy offers and sell offers are matched by price — no shopkeepers, no fixed prices. The market you see is the market the realm made.</p>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="heat"><span>World-Forge Heat Level:</span><span class="bar"><i></i></span><b style="color:var(--amber)">99.8%</b></div>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a> · <a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere.</div>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/embers.js"></script>
+<script>
+(function () {
+  const gate = document.getElementById('tk-gate');
+  const live = document.getElementById('tk-live');
+  const results = document.getElementById('tk-results');
+  function refresh() {
+    const on = Cinder.authed;
+    gate.style.display = on ? 'none' : '';
+    live.style.display = on ? '' : 'none';
+    if (on) Cinder.send({ t: 'bourse_open' });
+  }
+  new MutationObserver(refresh).observe(document.querySelector('[data-login-ui]'), { childList: true, subtree: true });
+  refresh();
+  document.addEventListener('bourse', (ev) => {
+    const m = ev.detail;
+    if (!m || !m.t) return;
+    if (m.t === 'bourse_open' || m.t === 'bourse_results' || m.t === 'bourse_search_results') {
+      const rows = m.results || m.items || m.offers || [];
+      if (!rows.length) { results.innerHTML = '<p class="status">No offers found.</p>'; return; }
+      results.innerHTML = rows.map((r) => {
+        const name = Cinder.esc(r.name || r.item || 'Unknown');
+        const price = r.price != null ? Number(r.price).toLocaleString() + ' gp' : '—';
+        const qty = r.qty != null ? ' ×' + r.qty : '';
+        const side = r.side ? ' <span class="status">[' + Cinder.esc(r.side) + ']</span>' : '';
+        return '<div class="trade"><span class="item">' + name + side + '<span class="qty">' + qty + '</span></span><span class="price">' + price + '</span></div>';
+      }).join('');
+    } else if (m.t === 'bourse_price') {
+      const name = Cinder.esc(m.item || m.name || '');
+      results.innerHTML = '<div class="trade"><span class="item">' + name + '</span><span class="price">' +
+        (m.price != null ? Number(m.price).toLocaleString() + ' gp' : 'no recent trades') + '</span></div>';
+    } else if (m.t === 'bourse_err' || m.msg) {
+      results.innerHTML = '<p class="status">' + Cinder.esc(m.msg || 'Market query failed.') + '</p>';
+    }
+  });
+  function search() {
+    const q = document.getElementById('tk-q').value.trim();
+    if (!q) return;
+    results.innerHTML = '<p class="status">Consulting the ledgers…</p>';
+    Cinder.send({ t: 'bourse_search', q });
+  }
+  document.getElementById('tk-search').addEventListener('click', search);
+  document.getElementById('tk-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+})();
+</script>
+</body>
+</html>
