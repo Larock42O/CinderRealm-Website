@@ -202,3 +202,18 @@ footer a:hover { color: var(--gold-hi); }
 .pmenu a { background: var(--gold-dim); color: #0d0906; font-weight: 700; text-align: center; }
 .pmenu button { background: transparent; border: 1px solid var(--line); color: var(--parch-dim); cursor: pointer; font-family: inherit; }
 .pmenu button:hover { border-color: var(--gold-dim); color: var(--parch); }
+
+/* polls: blind ballot, reveal-after-vote, auto-close */
+.tallies { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.trow { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center;
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: #0d0906; }
+.trow.mine { border-color: var(--gold-dim); }
+.trow.win { border-color: var(--gold-hi); box-shadow: 0 0 10px rgba(212,175,55,.25); }
+.tlabel { font-size: 13px; color: var(--parch); grid-column: 1 / -1; }
+.trow.mine .tlabel { color: var(--gold-hi); font-weight: 600; }
+.tbar { grid-column: 1; height: 10px; background: #1c130a; border-radius: 5px; overflow: hidden; }
+.tbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold-hi)); border-radius: 5px; }
+.trow.mine .tbar i { background: linear-gradient(90deg, #b8860b, var(--gold-hi)); }
+.tpct { grid-column: 2; font-size: 12px; color: var(--parch); white-space: nowrap; }
+.closed-banner { margin-top: 8px; padding: 8px 12px; border: 1px dashed var(--gold-dim); border-radius: 4px;
+  font-size: 13px; color: var(--parch-dim); }
