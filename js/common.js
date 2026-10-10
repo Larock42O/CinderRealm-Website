@@ -74,19 +74,8 @@
         el.innerHTML = '<span class="status">Signed in as <b>' + esc(name) + '</b></span> <button class="btn ghost" data-act="logout">Log out</button>';
         return;
       }
-      const mode = el.dataset.mode || 'login';
-      if (mode === 'register') {
-        el.innerHTML = '<input type="text" data-login-name placeholder="Choose a character name" autocomplete="username"> ' +
-          '<input type="password" data-login-pass placeholder="Choose a password" autocomplete="new-password"> ' +
-          '<input type="password" data-login-pass2 placeholder="Confirm password" autocomplete="new-password"> ' +
-          '<button class="btn" data-act="register">Create Account</button> ' +
-          '<a href="#" data-act="to-login" style="font-size:11px">back to log in</a>';
-      } else {
-        el.innerHTML = '<input type="text" data-login-name placeholder="Character name" autocomplete="username"> ' +
-          '<input type="password" data-login-pass placeholder="Password" autocomplete="current-password"> ' +
-          '<button class="btn" data-act="login">Log in</button> ' +
-          '<a href="#" data-act="to-register" style="font-size:11px">new here? create account</a>';
-      }
+      el.innerHTML = '<a class="btn ghost" href="login.html" style="font-size:12px;padding:5px 14px">Log In</a> ' +
+        '<a class="btn" href="register.html" style="font-size:12px;padding:5px 14px">Create Account</a>';
     });
     const st = document.getElementById('login-status');
     if (st) { st.textContent = S.authed ? 'Logged in as ' + S.name : ''; st.className = S.authed ? 'ok' : ''; }
@@ -95,46 +84,7 @@
 
   document.addEventListener('click', async (ev) => {
     const b = ev.target.closest('[data-act]'); if (!b) return;
-    ev.preventDefault();
-    const act = b.dataset.act;
-    if (act === 'to-register') {
-      const box = b.closest('[data-login-ui]');
-      box.dataset.mode = 'register';
-      updateLoginUI();
-      return;
-    }
-    if (act === 'to-login') {
-      const box = b.closest('[data-login-ui]');
-      box.dataset.mode = 'login';
-      updateLoginUI();
-      return;
-    }
-    if (act === 'login' || act === 'register') {
-      const box = b.closest('[data-login-ui]');
-      const name = box.querySelector('[data-login-name]').value.trim();
-      const pass = box.querySelector('[data-login-pass]').value;
-      const st = document.getElementById('login-status');
-      if (!name || !pass) { if (st) { st.textContent = 'Enter a name and password.'; st.className = 'err'; } return; }
-      if (act === 'register') {
-        const pass2 = box.querySelector('[data-login-pass2]').value;
-        if (pass !== pass2) { if (st) { st.textContent = 'Passwords do not match.'; st.className = 'err'; } return; }
-        if (name.length < 3) { if (st) { st.textContent = 'Name must be at least 3 characters.'; st.className = 'err'; } return; }
-      }
-      if (st) { st.textContent = act === 'register' ? 'Creating account…' : 'Connecting…'; st.className = ''; }
-      const r = await login(name, pass, act);
-      if (st) {
-        if (r.ok && act === 'register') { st.textContent = 'Account created — welcome to Dunmere, ' + name + '!'; st.className = 'ok'; }
-        else if (!r.ok) { st.textContent = r.msg || (act === 'register' ? 'Registration failed.' : 'Login failed'); st.className = 'err'; }
-        else { st.textContent = ''; st.className = ''; }
-      }
-    } else if (act === 'logout') { logout(); }
-  });
-  document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' && ev.target.matches('[data-login-name],[data-login-pass],[data-login-pass2]')) {
-      const box = ev.target.closest('[data-login-ui]');
-      const btn = box && (box.querySelector('[data-act="register"]') || box.querySelector('[data-act="login"]'));
-      if (btn) btn.click();
-    }
+    if (b.dataset.act === 'logout') { ev.preventDefault(); logout(); }
   });
 
   window.Cinder = { login, logout, send, get authed() { return S.authed; }, get name() { return S.name; }, esc,
