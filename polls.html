@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Polls — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
 <div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">Your voice shapes the realm</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
@@ -32,46 +32,106 @@
 <script src="js/common.js?v=4"></script>
 <script>
 (function () {
+  // Poll model. `opened` = ISO date the poll went live. `days` = voting window
+  // (default 7 — Jacob extends individual polls by raising this).
+  // Server tallies (GET /api/polls) land Tuesday; until then SERVER = null and
+  // each hero sees their own vote. Shape when live:
+  //   { polls: [{ id, tallies: [n,n,n], closed: bool, winner: idx|null }] }
   const POLLS = [
     { id: 'p1', q: 'Which region should get the next new quest?',
-      opts: ['The Outlands', 'Sunfall Desert', 'The Gloamfen', 'Highcrest Castle'] },
+      opts: ['The Outlands', 'Sunfall Desert', 'The Gloamfen', 'Highcrest Castle'],
+      opened: '2026-10-10', days: 7 },
     { id: 'p2', q: 'Where should the third Tradekeep open?',
-      opts: ['Whiteguard Keep', 'Thornhollow', 'Mosswick', 'Keep it to two for now'] },
+      opts: ['Whiteguard Keep', 'Thornhollow', 'Mosswick', 'Keep it to two for now'],
+      opened: '2026-10-10', days: 7 },
     { id: 'p3', q: 'What should the next weapon special attack be?',
-      opts: ['Frostbite Cleave (ice damage + slow)', 'Ember Chain (hits jump between foes)', 'Stoneskin Slam (damage + brief shield)', 'Ashen Veil (brief invisibility)'] },
+      opts: ['Frostbite Cleave (ice damage + slow)', 'Ember Chain (hits jump between foes)', 'Stoneskin Slam (damage + brief shield)', 'Ashen Veil (brief invisibility)'],
+      opened: '2026-10-10', days: 7 },
   ];
-  const box = document.getElementById('polls');
-  function votes(id) {
-    try { return JSON.parse(localStorage.getItem('cinder_poll_' + id) || 'null'); } catch (e) { return null; }
+  let SERVER = null;
+  const DAY = 86400000;
+
+  function closeTime(p) { return new Date(p.opened + 'T00:00:00').getTime() + p.days * DAY; }
+  function isClosed(p) {
+    const s = serverPoll(p.id);
+    if (s && typeof s.closed === 'boolean') return s.closed;
+    return Date.now() > closeTime(p);
   }
-  // Community tallies go live with the server-backed poll API (coming with the next realm update).
-  // Until then each hero sees their own vote, saved on this device.
+  function serverPoll(id) {
+    if (!SERVER || !SERVER.polls) return null;
+    return SERVER.polls.find((x) => x.id === id) || null;
+  }
+  function myVote(id) {
+    try { const v = JSON.parse(localStorage.getItem('cinder_poll_' + id) || 'null'); return v === null ? null : Number(v); } catch (e) { return null; }
+  }
+  function fmtDate(ts) {
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function resultBars(p, mine) {
+    const s = serverPoll(p.id);
+    if (!s || !s.tallies) {
+      return '<p class="status" style="margin-top:8px">Your vote is in. Realm-wide tallies go live with Tuesday\u2019s update — then you\u2019ll see every voter\u2019s choice here.</p>';
+    }
+    const total = s.tallies.reduce((a, b) => a + b, 0) || 1;
+    const rows = p.opts.map((o, i) => {
+      const n = s.tallies[i] || 0;
+      const pct = Math.round((n / total) * 100);
+      const isMine = mine === i, isWin = s.winner === i;
+      return '<div class="trow' + (isMine ? ' mine' : '') + (isWin ? ' win' : '') + '">' +
+        '<span class="tlabel">' + (isMine ? '✔ ' : '') + Cinder.esc(o) + (isWin ? ' <b style="color:var(--gold-hi)">★</b>' : '') + '</span>' +
+        '<span class="tbar"><i style="width:' + pct + '%"></i></span>' +
+        '<span class="tpct">' + pct + '% <span class="status">(' + n + ')</span></span></div>';
+    }).join('');
+    return '<div class="tallies">' + rows + '</div>' +
+      '<p class="status" style="margin-top:6px">' + total + ' vote' + (total === 1 ? '' : 's') + ' cast.</p>';
+  }
+
   function render() {
+    const box = document.getElementById('polls');
     box.innerHTML = POLLS.map((p) => {
-      const v = votes(p.id);
-      const opts = p.opts.map((o, i) => {
-        if (v === null) {
-          return '<label data-poll="' + p.id + '" data-opt="' + i + '"><span class="opt"><input type="radio" name="' + p.id + '"> ' + Cinder.esc(o) + '</span></label>';
-        }
-        const mine = v === i;
-        return '<div class="poll ' + (mine ? 'voted' : '') + '" style="border:none;padding:4px 8px">' +
-          '<span class="opt">' + (mine ? '✔ ' : '') + Cinder.esc(o) + '</span></div>';
-      }).join('');
-      const foot = v === null
-        ? '<button class="btn" data-vote="' + p.id + '" style="margin-top:8px">Vote</button>'
-        : '<p class="status" style="margin-top:8px">Vote recorded. Realm-wide tallies go live with the next update.</p>';
-      return '<div class="poll"><h3>' + Cinder.esc(p.q) + '</h3>' + opts + foot + '</div>';
+      const mine = myVote(p.id);
+      const closed = isClosed(p);
+      const s = serverPoll(p.id);
+      let badge;
+      if (closed) {
+        const win = s && s.winner != null ? p.opts[s.winner] : null;
+        badge = '<p class="closed-banner">Poll closed ' + fmtDate(closeTime(p)) +
+          (win ? ' — <b style="color:var(--gold-hi)">decided: ' + Cinder.esc(win) + '</b>' : ' — final tally pending.') + '</p>';
+      } else {
+        const left = Math.max(0, Math.ceil((closeTime(p) - Date.now()) / DAY));
+        badge = '<p class="status">Voting closes ' + fmtDate(closeTime(p)) + ' (' + left + ' day' + (left === 1 ? '' : 's') + ' left).</p>';
+      }
+      let body;
+      if (!closed && mine === null) {
+        // Blind ballot: options only, no tallies until you vote.
+        body = p.opts.map((o, i) =>
+          '<label data-poll="' + p.id + '" data-opt="' + i + '"><span class="opt"><input type="radio" name="' + p.id + '"> ' + Cinder.esc(o) + '</span></label>'
+        ).join('') + '<button class="btn" data-vote="' + p.id + '" style="margin-top:8px">Vote</button>';
+      } else {
+        // Voted (or closed): reveal the choices.
+        body = resultBars(p, mine);
+      }
+      return '<div class="poll"><h3>' + Cinder.esc(p.q) + '</h3>' + badge + body + '</div>';
     }).join('');
   }
-  box.addEventListener('click', (e) => {
+
+  document.getElementById('polls').addEventListener('click', (e) => {
     const b = e.target.closest('[data-vote]'); if (!b) return;
     const id = b.dataset.vote;
+    const box = document.getElementById('polls');
     const sel = box.querySelector('input[name="' + id + '"]:checked');
     if (!sel) return;
-    const label = sel.closest('label');
-    localStorage.setItem('cinder_poll_' + id, label.dataset.opt);
+    localStorage.setItem('cinder_poll_' + id, sel.closest('label').dataset.opt);
+    // Tuesday: POST /api/polls/vote here (one vote per account, server-enforced).
     render();
   });
+
+  // Try the server tallies; silently keep local mode if absent.
+  fetch('https://cinderrealm.onrender.com/api/polls')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => { if (d && d.polls) { SERVER = d; render(); } })
+    .catch(() => {});
   render();
 })();
 </script>
