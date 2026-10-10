@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tradekeep — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
-<div class="topstrip"><span>World of Dunmere</span><span class="online">The realm's beating market</span></div>
+<div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">The realm's beating market</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
 <div class="masthead">
   <a class="logoimg" href="index.html"><img src="img/logo.png?v=6" alt="Cinderrealm — World of Dunmere"></a>
   <nav class="bar">
@@ -38,7 +38,7 @@
   <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
   <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
 </footer>
-<script src="js/common.js?v=2"></script>
+<script src="js/common.js?v=3"></script>
 <script>
 (function () {
   const gate = document.getElementById('tk-gate');
@@ -48,9 +48,16 @@
     const on = Cinder.authed;
     gate.style.display = on ? 'none' : '';
     live.style.display = on ? '' : 'none';
-    if (on) Cinder.send({ t: 'bourse_open' });
+    if (on && !Cinder.live) {
+      results.innerHTML = '<p class="status">Linking to the Tradekeep…</p>';
+      Cinder.connect()
+        .then(() => Cinder.send({ t: 'bourse_open' }))
+        .catch(() => { results.innerHTML = '<p class="status">Could not reach the Tradekeep. Your session may have expired — try logging in again.</p>'; });
+    } else if (on) {
+      Cinder.send({ t: 'bourse_open' });
+    }
   }
-  new MutationObserver(refresh).observe(document.querySelector('[data-login-ui]'), { childList: true, subtree: true });
+  new MutationObserver(refresh).observe(document.querySelector('[data-profile]'), { childList: true, subtree: true });
   refresh();
   document.addEventListener('bourse', (ev) => {
     const m = ev.detail;
