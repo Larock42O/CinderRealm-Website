@@ -4,6 +4,12 @@
   const S = { ws: null, authed: false, name: null, token: null, waiters: {} };
   let seq = 0;
 
+  function saveSession() {
+    try { sessionStorage.setItem('cinder_session', JSON.stringify({ name: S.name, token: S.token })); } catch (e) {}
+  }
+  function clearSession() {
+    try { sessionStorage.removeItem('cinder_session'); } catch (e) {}
+  }
   function send(obj) {
     if (S.ws && S.ws.readyState === 1) S.ws.send(JSON.stringify(obj));
   }
@@ -13,9 +19,9 @@
       const ws = new WebSocket(WS_URL);
       S.ws = ws;
       const to = setTimeout(() => reject(new Error('connect timeout')), 20000);
-      ws.onopen = () => { clearTimeout(to); ws.send(JSON.stringify({ t: 'hello', token: '' })); resolve(); };
+      ws.onopen = () => { clearTimeout(to); ws.send(JSON.stringify({ t: 'hello', token: S.token || '' })); resolve(); };
       ws.onerror = () => { clearTimeout(to); reject(new Error('connection failed')); };
-      ws.onclose = () => { S.authed = false; S.name = null; updateLoginUI(); };
+      ws.onclose = () => { S.authed = false; S.name = null; S.ws = null; updateLoginUI(); };
       ws.onmessage = (ev) => {
         let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
         const t = m.t;
@@ -26,14 +32,18 @@
           if (S.waiters.mode === 'register') {
             const w = S.waiters.auth; delete S.waiters.auth; delete S.waiters.mode;
             S.authed = true; S.name = S.pendingName;
+            saveSession();
             updateLoginUI();
             if (w) w(true);
           }
         } else if (t === 'auth_err') {
           const w = S.waiters.auth; delete S.waiters.auth; delete S.waiters.mode;
-          if (w) w(false, m.msg || 'Login failed');
+          // Saved token rejected — drop it so we don't loop on a dead session
+          if (!w) { S.authed = false; S.name = null; S.token = null; clearSession(); updateLoginUI(); }
+          else if (w) w(false, m.msg || 'Login failed');
         } else if (t === 'welcome' || t === 'state') {
           S.authed = true;
+          saveSession();
           const w = S.waiters.auth; delete S.waiters.auth;
           if (w) w(true);
           updateLoginUI();
@@ -65,6 +75,7 @@
   function logout() {
     try { S.ws && S.ws.close(); } catch (e) {}
     S.ws = null; S.authed = false; S.name = null; S.token = null;
+    clearSession();
     updateLoginUI();
   }
   function updateLoginUI() {
@@ -89,5 +100,16 @@
 
   window.Cinder = { login, logout, send, get authed() { return S.authed; }, get name() { return S.name; }, esc,
     ensure: async () => { if (!S.authed) throw new Error('not logged in'); await connect(); } };
+
+  // Restore session across page loads (per-tab only; cleared when the tab closes).
+  // Revalidates the token with the server in the background.
+  (function restore() {
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem('cinder_session') || 'null'); } catch (e) {}
+    if (!saved || !saved.token || !saved.name) return;
+    S.name = saved.name; S.token = saved.token; S.authed = true;
+    updateLoginUI();
+    connect().catch(() => { S.authed = false; S.name = null; S.token = null; clearSession(); updateLoginUI(); });
+  })();
   document.addEventListener('DOMContentLoaded', updateLoginUI);
 })();
