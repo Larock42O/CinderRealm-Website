@@ -23,6 +23,9 @@
 .post .who b { color:var(--gold-hi); display:block; font-size:13px; }
 .post .who .mod { color:var(--ember); font-size:10px; font-variant:small-caps; letter-spacing:1px; }
 .post .what { flex:1; font-size:13px; line-height:1.65; color:#c9bd97; }
+.post .what b { color: var(--gold-hi); }
+.post .what ul { margin: 8px 0 8px 18px; }
+.post .what li { margin-bottom: 6px; }
 .post .when { font-size:10px; color:var(--parch-dim); margin-top:6px; }
 textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px solid var(--line);
   color:var(--parch); padding:8px 10px; border-radius:3px; font-family:inherit; font-size:13px; }
@@ -37,7 +40,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
 <div class="masthead">
   <a class="logoimg" href="index.html"><img src="img/logo.png" alt="Cinderrealm — World of Dunmere"></a>
   <nav class="bar">
-    <a href="index.html">Home</a><a href="world.html">World</a><a href="guides.html">Guides</a><a href="hiscores.html">Hiscores</a>
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
     <a href="tradekeep.html">Tradekeep</a><a href="forums.html" class="active">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
   </nav>
 </div>
@@ -78,8 +81,49 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
     { id: 'clans', name: 'Clans & Fellowships', desc: 'Recruit for your company or find one to join.' },
     { id: 'offtopic', name: 'The Cold Hearth', desc: 'Off-topic — keep it civil, keep it clean.' },
   ];
+  const GUIDES = [
+    { t: "Your First Hour in Dunmere", b: `
+      <p>Welcome, hero. You wake in <b>Emberhold</b> with Combat level 3, 25 coins, and a starter pack: bronze pickaxe, bronze axe, small net, tinderbox, and 10 bait.</p>
+      <ul>
+        <li><b>Move:</b> click anywhere on the ground to walk there. Right-click for interact options on people, objects, and monsters.</li>
+        <li><b>Camera:</b> drag to rotate, scroll or pinch to zoom. The +/− buttons work too.</li>
+        <li><b>First moves:</b> talk to the villagers in Emberhold — some hand out beginner tasks. Swing your axe at a tree (Logging), your pickaxe at rocks (Excavation), or cast your net at a fishing spot (Angling).</li>
+        <li><b>Bank:</b> right-click the Bank Teller to store your goods. Your bank follows you across the realm.</li>
+        <li><b>Staying alive:</b> the wilds around Emberhold are gentle, but venture far and the monsters bite back. Eat food (cook it first with Culinary) and run when outmatched.</li>
+      </ul>` },
+    { t: "Skills & Training — Where to Start", b: `
+      <p>Dunmere has <b>21 skills</b>. You don't need to master them all at once — pick two or three that feed each other.</p>
+      <ul>
+        <li><b>Gatherer path:</b> Logging + Excavation + Angling. Low requirements, steady resources, everything sells.</li>
+        <li><b>Warrior path:</b> Precision + Might + Resilience. Train on the rats and boars outside Emberhold before touching anything with teeth.</li>
+        <li><b>Crafter path:</b> Metallurgy + Artisan + Essencecraft. Turn ores into bars, bars into gear, spark into runes.</li>
+        <li><b>Level 20 comes fast</b> in every skill by design — the real climb starts after. Don't burn out grinding one thing; rotate.</li>
+        <li><b>Skill capes:</b> reach 99 in any skill and its master will sell you the cape — proof you outlasted the grind.</li>
+      </ul>` },
+    { t: "Combat Basics — Don't Die", b: `
+      <ul>
+        <li><b>Gear tiers:</b> seven metals, weakest to strongest. Bronze is where everyone starts; white gold is the dream. Upgrade when you can afford it, not before.</li>
+        <li><b>Know your foe:</b> check a monster's level before engaging. Anything more than a few levels above you is a gamble.</li>
+        <li><b>Food is life:</b> cook what you catch or forage. Never delve a dungeon on an empty stomach.</li>
+        <li><b>Weapon specials:</b> signature attacks like Cinder Slash and Ember Burst turn fights — learn when your weapon's special is ready and spend it wisely.</li>
+        <li><b>The Outlands are PvP.</b> Everywhere else, monsters are the only thing trying to kill you. Cross into the northern ice and heroes become the predators. Don't carry what you can't lose.</li>
+      </ul>` },
+    { t: "Making Your First Coins", b: `
+      <ul>
+        <li><b>Gather and sell:</b> logs, ores, and fish always have buyers. It's slow, honest, and it works from level 1.</li>
+        <li><b>The Tradekeep:</b> Dunmere's player market (Ironspire City and Sunfall). Check prices before you sell — the ledgers on this site show live offers when you're logged in. Buy low, sell high, mind the fees.</li>
+        <li><b>Quests pay:</b> stories like <i>Embers of Dunmere</i> reward coins, XP, and gear. The quest journal is in your side panel.</li>
+        <li><b>Don't beg, don't scam.</b> Both are against the Laws of the Realm and the Crown Guard has a long memory.</li>
+      </ul>` },
+    { t: "Teleports & Getting Around", b: `
+      <ul>
+        <li><b>Spellbook teleports</b> unlock as your Arcana rises — Whiteguard Keep, Emberhold, Mosswick, Thornhollow, Oasis, and Kilnmarch each have one. Bring the right runes.</li>
+        <li><b>On foot</b> is free and you see the world. Dunmere rewards wanderers — new villages are always worth a look.</li>
+        <li><b>Boats</b> will one day sail to the offshore isles. For now, admire Saltmere from the coast.</li>
+      </ul>` },
+  ];
   const q = new URLSearchParams(location.search);
-  const cat = q.get('cat'), thread = q.get('thread');
+  const cat = q.get('cat'), thread = q.get('thread'), guide = q.get('guide');
 
   function esc(s) { return Cinder.esc(s); }
   function needLogin() {
@@ -106,10 +150,12 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
         '<div class="forum-cat"><div><h3><a href="forums.html?cat=' + c.id + '">' + esc(c.name) + '</a></h3><p>' + esc(c.desc || '') + '</p></div>' +
         '<div class="counts">' + (c.threads || 0) + ' threads<br>' + (c.posts || 0) + ' posts</div></div>').join('');
     } catch (e) {
-      view.innerHTML = CATS.map((c) =>
-        '<div class="forum-cat"><div><h3><a href="forums.html?cat=' + c.id + '">' + esc(c.name) + '</a></h3><p>' + esc(c.desc) + '</p></div>' +
-        '<div class="counts">— threads<br>— posts</div></div>').join('') +
-        '<div class="notice" style="margin:14px">The forum halls are being built — threads open with the next server update.</div>';
+      view.innerHTML = CATS.map((c) => {
+        const tc = c.id === 'help' ? GUIDES.length + ' pinned' : '—';
+        return '<div class="forum-cat"><div><h3><a href="forums.html?cat=' + c.id + '">' + esc(c.name) + '</a></h3><p>' + esc(c.desc) + '</p></div>' +
+        '<div class="counts">' + tc + ' threads<br>— posts</div></div>';
+      }).join('') +
+        '<div class="notice" style="margin:14px">The forum halls are being built — player threads open with the next server update.</div>';
     }
   }
   async function showCat(id) {
@@ -123,7 +169,14 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
         '<div class="by">by ' + esc(t.author) + ' · ' + (t.replies || 0) + ' replies</div></div>' +
         '<div class="by">' + esc(t.lastpost || '') + '</div></div>').join('') || '<div class="notice" style="margin:14px">No threads yet — start the first.</div>';
     } catch (e) {
-      html += '<div class="notice" style="margin:14px">Threads open with the next server update.</div>';
+      let guideThreads = '';
+      if (id === 'help') {
+        guideThreads = GUIDES.map((g, i) =>
+          '<div class="thread"><div><a class="t" href="forums.html?guide=' + i + '">📌 ' + esc(g.t) + '</a>' +
+          '<div class="by">by Jarvis <span style="color:var(--ember)">♛ Moderator</span></div></div>' +
+          '<div class="by">pinned</div></div>').join('');
+      }
+      html += guideThreads + '<div class="notice" style="margin:14px">The forum halls are being built — player threads open with the next server update.</div>';
     }
     html += '<div style="padding:14px"><button class="btn" id="newthread">Start New Thread</button></div>';
     view.innerHTML = html;
@@ -163,7 +216,19 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
         .catch(() => alert('The forum halls are still being built — try again after the next server update.'));
     });
   }
-  if (thread) showThread(thread);
+  function showGuide(i) {
+    const g = GUIDES[+i];
+    if (!g) { showIndex(); return; }
+    title.textContent = g.t;
+    view.innerHTML =
+      '<div class="crumb" style="padding:12px 14px 0"><a href="forums.html">Forums</a> → ' +
+      '<a href="forums.html?cat=help">Help & Guides</a> → ' + esc(g.t) + '</div>' +
+      '<div class="post"><div class="who"><b>Jarvis</b><span class="mod">♛ Moderator</span></div>' +
+      '<div class="what">' + g.b + '<div class="when">Pinned guide</div></div></div>' +
+      '<div class="notice" style="margin:14px">Replies open with the next server update.</div>';
+  }
+  if (guide !== null && guide !== undefined && guide !== '') showGuide(guide);
+  else if (thread) showThread(thread);
   else if (cat) showCat(cat);
   else showIndex();
 })();
