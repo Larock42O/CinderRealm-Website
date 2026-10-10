@@ -22,8 +22,15 @@
         if (t === 'auth_ok') {
           S.token = m.token || '';
           ws.send(JSON.stringify({ t: 'hello', token: S.token }));
+          // Registrations complete at auth_ok (character creator is in-game only)
+          if (S.waiters.mode === 'register') {
+            const w = S.waiters.auth; delete S.waiters.auth; delete S.waiters.mode;
+            S.authed = true; S.name = S.pendingName;
+            updateLoginUI();
+            if (w) w(true);
+          }
         } else if (t === 'auth_err') {
-          const w = S.waiters.auth; delete S.waiters.auth;
+          const w = S.waiters.auth; delete S.waiters.auth; delete S.waiters.mode;
           if (w) w(false, m.msg || 'Login failed');
         } else if (t === 'welcome' || t === 'state') {
           S.authed = true;
@@ -47,9 +54,11 @@
         updateLoginUI();
         resolve({ ok, msg });
       };
+      S.waiters.mode = mode || 'login';
+      S.pendingName = name;
       S.ws.send(JSON.stringify({ t: mode || 'login', name, pass }));
       setTimeout(() => {
-        if (S.waiters.auth) { delete S.waiters.auth; resolve({ ok: false, msg: 'Login timed out.' }); }
+        if (S.waiters.auth) { delete S.waiters.auth; delete S.waiters.mode; resolve({ ok: false, msg: 'Login timed out.' }); }
       }, 20000);
     });
   }
@@ -61,11 +70,23 @@
   function updateLoginUI() {
     document.querySelectorAll('[data-login-ui]').forEach((el) => {
       const name = S.authed ? S.name : null;
-      el.innerHTML = name
-        ? '<span class="status">Signed in as <b>' + esc(name) + '</b></span> <button class="btn ghost" data-act="logout">Log out</button>'
-        : '<input type="text" data-login-name placeholder="Character name" autocomplete="username"> ' +
+      if (name) {
+        el.innerHTML = '<span class="status">Signed in as <b>' + esc(name) + '</b></span> <button class="btn ghost" data-act="logout">Log out</button>';
+        return;
+      }
+      const mode = el.dataset.mode || 'login';
+      if (mode === 'register') {
+        el.innerHTML = '<input type="text" data-login-name placeholder="Choose a character name" autocomplete="username"> ' +
+          '<input type="password" data-login-pass placeholder="Choose a password" autocomplete="new-password"> ' +
+          '<input type="password" data-login-pass2 placeholder="Confirm password" autocomplete="new-password"> ' +
+          '<button class="btn" data-act="register">Create Account</button> ' +
+          '<a href="#" data-act="to-login" style="font-size:11px">back to log in</a>';
+      } else {
+        el.innerHTML = '<input type="text" data-login-name placeholder="Character name" autocomplete="username"> ' +
           '<input type="password" data-login-pass placeholder="Password" autocomplete="current-password"> ' +
-          '<button class="btn" data-act="login">Log in</button>';
+          '<button class="btn" data-act="login">Log in</button> ' +
+          '<a href="#" data-act="to-register" style="font-size:11px">new here? create account</a>';
+      }
     });
     const st = document.getElementById('login-status');
     if (st) { st.textContent = S.authed ? 'Logged in as ' + S.name : ''; st.className = S.authed ? 'ok' : ''; }
@@ -74,23 +95,44 @@
 
   document.addEventListener('click', async (ev) => {
     const b = ev.target.closest('[data-act]'); if (!b) return;
-    if (b.dataset.act === 'login') {
+    ev.preventDefault();
+    const act = b.dataset.act;
+    if (act === 'to-register') {
+      const box = b.closest('[data-login-ui]');
+      box.dataset.mode = 'register';
+      updateLoginUI();
+      return;
+    }
+    if (act === 'to-login') {
+      const box = b.closest('[data-login-ui]');
+      box.dataset.mode = 'login';
+      updateLoginUI();
+      return;
+    }
+    if (act === 'login' || act === 'register') {
       const box = b.closest('[data-login-ui]');
       const name = box.querySelector('[data-login-name]').value.trim();
       const pass = box.querySelector('[data-login-pass]').value;
       const st = document.getElementById('login-status');
-      if (st) { st.textContent = 'Connecting…'; st.className = ''; }
-      const r = await login(name, pass, 'login');
-      if (st) { st.textContent = r.ok ? '' : (r.msg || 'Login failed'); st.className = r.ok ? '' : 'err'; }
-      if (!r.ok && /invalid|no account|not found/i.test(r.msg || '')) {
-        if (st) st.textContent = r.msg + ' — try creating the account in-game first.';
+      if (!name || !pass) { if (st) { st.textContent = 'Enter a name and password.'; st.className = 'err'; } return; }
+      if (act === 'register') {
+        const pass2 = box.querySelector('[data-login-pass2]').value;
+        if (pass !== pass2) { if (st) { st.textContent = 'Passwords do not match.'; st.className = 'err'; } return; }
+        if (name.length < 3) { if (st) { st.textContent = 'Name must be at least 3 characters.'; st.className = 'err'; } return; }
       }
-    } else if (b.dataset.act === 'logout') { logout(); }
+      if (st) { st.textContent = act === 'register' ? 'Creating account…' : 'Connecting…'; st.className = ''; }
+      const r = await login(name, pass, act);
+      if (st) {
+        if (r.ok && act === 'register') { st.textContent = 'Account created — welcome to Dunmere, ' + name + '!'; st.className = 'ok'; }
+        else if (!r.ok) { st.textContent = r.msg || (act === 'register' ? 'Registration failed.' : 'Login failed'); st.className = 'err'; }
+        else { st.textContent = ''; st.className = ''; }
+      }
+    } else if (act === 'logout') { logout(); }
   });
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' && ev.target.matches('[data-login-name],[data-login-pass]')) {
+    if (ev.key === 'Enter' && ev.target.matches('[data-login-name],[data-login-pass],[data-login-pass2]')) {
       const box = ev.target.closest('[data-login-ui]');
-      const btn = box && box.querySelector('[data-act="login"]');
+      const btn = box && (box.querySelector('[data-act="register"]') || box.querySelector('[data-act="login"]'));
       if (btn) btn.click();
     }
   });
