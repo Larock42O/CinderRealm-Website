@@ -42,10 +42,14 @@ a:hover { color: #fff; }
   padding: 18px 20px 4px;
 }
 .masthead { text-align: center; }
-.masthead .logoimg img { height: 81px; width: auto; display: block; margin: 0 auto;
-  filter: drop-shadow(0 0 14px rgba(255,122,26,0.3)); }
-.masthead .logoimg { display: inline-block; padding: 8px 0 10px; }
-.masthead nav.bar { justify-content: center; }
+.masthead .logoimg img { height: 128px; width: auto; max-width: 92vw; display: block; margin: 0 auto; }
+.masthead .logoimg { display: block; padding: 14px 10px 16px; margin: 0 auto; max-width: 860px;
+  border: 1px solid var(--gold-dim);
+  outline: 3px double var(--gold-dim);
+  outline-offset: 5px;
+  background: radial-gradient(ellipse at 50% 40%, #1d150b 0%, #100c07 75%);
+}
+.masthead nav.bar { justify-content: center; margin-top: 18px; }
 nav.bar {
   display: flex; gap: 2px; margin-top: 12px; flex-wrap: wrap;
 }
