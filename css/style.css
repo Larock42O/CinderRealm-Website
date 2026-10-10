@@ -47,7 +47,7 @@ a:hover { color: #fff; }
   border: 1px solid var(--gold-dim);
   outline: 3px double var(--gold-dim);
   outline-offset: 5px;
-  background: linear-gradient(180deg, #9a7443 0%, #7a5a33 55%, #5f4526 100%);
+  background: linear-gradient(180deg, #241a0e 0%, #150e07 60%, #0e0905 100%);
 }
 .masthead nav.bar { justify-content: center; margin-top: 18px; }
 nav.bar {
