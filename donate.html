@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donate — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span class="online">Keep the Forge lit</span></div>
+<div class="masthead">
+  <a class="logo" href="index.html">Cinderrealm<small>World of Dunmere</small></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="polls.html">Polls</a><a href="donate.html" class="active">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel">
+    <h2>Fuel the Forge</h2>
+    <div class="body">
+      <p>Cinderrealm is built by players, for players — no publishers, no investors, just the realm. Donations pay for the servers, the domain, and the long nights of development. Every coin goes back into Dunmere.</p>
+      <p>Once the realm is fully established, donations end and a <b>members world</b> opens instead — with new skills, quests, monsters, and regions for supporters. Until then, your generosity is what keeps the Forge lit.</p>
+      <div class="tiers">
+        <div class="tier">
+          <h3>Sparkkeeper</h3><div class="amt">$5</div>
+          <ul><li>Supporter badge on the site</li><li>Our eternal thanks</li></ul>
+          <button class="btn ghost" data-donate="Sparkkeeper">Donate $5</button>
+        </div>
+        <div class="tier featured">
+          <h3>Flamebearer</h3><div class="amt">$15</div>
+          <ul><li>Supporter badge on the site</li><li>Name on the Founders' Wall</li><li>Vote weight in polls ×2</li></ul>
+          <button class="btn" data-donate="Flamebearer">Donate $15</button>
+        </div>
+        <div class="tier">
+          <h3>Forge Patron</h3><div class="amt">$30</div>
+          <ul><li>Everything in Flamebearer</li><li>Early access to test builds</li><li>A say in the members-world roadmap</li></ul>
+          <button class="btn ghost" data-donate="Forge Patron">Donate $30</button>
+        </div>
+      </div>
+      <div class="notice" id="donate-note">Donation processing is being set up — the buttons above will go live as soon as the payment link is connected. Check back soon.</div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>The Road to Members</h2>
+    <div class="body">
+      <p>When donations have carried the realm to stability, the members world opens its gates: new skills, new quests, new monsters, and new lands on the map — a whole second age of Dunmere, funded by the heroes who believed first.</p>
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="polls.html">Polls</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js"></script>
+<script>
+// Wire DONATE_URL to the payment link (Ko-fi / PayPal / etc.) once Jacob sets it up.
+(function () {
+  const DONATE_URL = '';
+  document.querySelectorAll('[data-donate]').forEach((b) => {
+    b.addEventListener('click', () => {
+      if (DONATE_URL) { window.open(DONATE_URL, '_blank', 'noopener'); }
+      else {
+        const n = document.getElementById('donate-note');
+        n.style.display = '';
+        n.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
+  if (DONATE_URL) document.getElementById('donate-note').style.display = 'none';
+})();
+</script>
+</body>
+</html>
