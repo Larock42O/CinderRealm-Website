@@ -43,11 +43,8 @@ a:hover { color: #fff; }
 }
 .masthead { text-align: center; }
 .masthead .logoimg img { height: 110px; width: auto; max-width: 100%; display: block; flex-shrink: 1; }
-.masthead .logoimg { display: flex; justify-content: center; align-items: center; padding: 18px 10px; margin: 0 auto; max-width: 860px;
-  border: 1px solid var(--gold-dim);
-  outline: 3px double var(--gold-dim);
-  outline-offset: 5px;
-  background: linear-gradient(180deg, #241a0e 0%, #150e07 60%, #0e0905 100%);
+.masthead .logoimg { display: flex; justify-content: center; align-items: center; padding: 16px 10px 18px; margin: 0 auto; max-width: 900px;
+  background: none; border: none; outline: none;
 }
 .masthead nav.bar { justify-content: center; margin-top: 18px; }
 nav.bar {
