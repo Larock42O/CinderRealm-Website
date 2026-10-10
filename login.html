@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.authpanel { max-width: 420px; margin: 30px auto; }
+.authpanel .body { padding: 20px; }
+.authpanel label { display: block; font-size: 12px; color: var(--parch-dim); margin: 12px 0 4px; font-variant: small-caps; letter-spacing: 1px; }
+.authpanel input { width: 100%; }
+.authpanel .btn { width: 100%; margin-top: 16px; text-align: center; }
+.authpanel .swap { text-align: center; margin-top: 12px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span class="online">Welcome back, hero</span></div>
+<div class="masthead">
+  <a class="logo" href="index.html">Cinderrealm<small>World of Dunmere</small></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="guides.html">Guides</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel authpanel">
+    <h2>Log In</h2>
+    <div class="body">
+      <div id="form-login">
+        <label>Character name</label>
+        <input type="text" id="l-name" autocomplete="username">
+        <label>Password</label>
+        <input type="password" id="l-pass" autocomplete="current-password">
+        <button class="btn" id="l-go">Log In</button>
+        <p class="status" id="l-msg" style="margin-top:10px"></p>
+        <div class="swap">New to Dunmere? <a href="register.html">Create an account</a></div>
+      </div>
+      <div id="form-done" style="display:none;text-align:center;padding:16px">
+        <p style="font-size:15px">Welcome back, <b id="done-name" style="color:var(--gold-hi)"></b>.</p>
+        <p style="margin-top:12px"><a class="btn play" href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a></p>
+        <p style="margin-top:12px"><a href="index.html">Back to the site</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="register.html">Create Account</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js"></script>
+<script>
+(function () {
+  const msg = document.getElementById('l-msg');
+  async function go() {
+    const name = document.getElementById('l-name').value.trim();
+    const pass = document.getElementById('l-pass').value;
+    if (!name || !pass) { msg.textContent = 'Enter your name and password.'; msg.className = 'status err'; return; }
+    msg.textContent = 'Connecting…'; msg.className = 'status';
+    const r = await Cinder.login(name, pass, 'login');
+    if (r.ok) {
+      document.getElementById('form-login').style.display = 'none';
+      document.getElementById('done-name').textContent = name;
+      document.getElementById('form-done').style.display = '';
+    } else { msg.textContent = r.msg || 'Login failed.'; msg.className = 'status err'; }
+  }
+  document.getElementById('l-go').addEventListener('click', go);
+  document.getElementById('l-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  if (Cinder.authed) {
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('done-name').textContent = Cinder.name;
+    document.getElementById('form-done').style.display = '';
+  }
+})();
+</script>
+</body>
+</html>
