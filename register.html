@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.authpanel { max-width: 420px; margin: 30px auto; }
+.authpanel .body { padding: 20px; }
+.authpanel label { display: block; font-size: 12px; color: var(--parch-dim); margin: 12px 0 4px; font-variant: small-caps; letter-spacing: 1px; }
+.authpanel input { width: 100%; }
+.authpanel .btn { width: 100%; margin-top: 16px; text-align: center; }
+.authpanel .swap { text-align: center; margin-top: 12px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span class="online">Your spark awaits</span></div>
+<div class="masthead">
+  <a class="logo" href="index.html">Cinderrealm<small>World of Dunmere</small></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="guides.html">Guides</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel authpanel">
+    <h2>Create Account</h2>
+    <div class="body">
+      <div id="form-reg">
+        <p style="font-size:13px">One account for the website, the forums, and the game itself.</p>
+        <label>Choose a character name</label>
+        <input type="text" id="r-name" autocomplete="username" maxlength="16">
+        <label>Choose a password</label>
+        <input type="password" id="r-pass" autocomplete="new-password">
+        <label>Confirm password</label>
+        <input type="password" id="r-pass2" autocomplete="new-password">
+        <button class="btn" id="r-go">Create Account</button>
+        <p class="status" id="r-msg" style="margin-top:10px"></p>
+        <div class="swap">Already have an account? <a href="login.html">Log in</a></div>
+      </div>
+      <div id="form-done" style="display:none;text-align:center;padding:16px">
+        <p style="font-size:15px">Welcome to Dunmere, <b id="done-name" style="color:var(--gold-hi)"></b>.</p>
+        <p class="status">Your hero is ready. Step through the gates when you are.</p>
+        <p style="margin-top:12px"><a class="btn play" href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a></p>
+        <p style="margin-top:12px"><a href="guides.html">Newcomer guides →</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="login.html">Log In</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js"></script>
+<script>
+(function () {
+  const msg = document.getElementById('r-msg');
+  async function go() {
+    const name = document.getElementById('r-name').value.trim();
+    const pass = document.getElementById('r-pass').value;
+    const pass2 = document.getElementById('r-pass2').value;
+    if (!name || !pass) { msg.textContent = 'Enter a name and password.'; msg.className = 'status err'; return; }
+    if (name.length < 3) { msg.textContent = 'Name must be at least 3 characters.'; msg.className = 'status err'; return; }
+    if (pass !== pass2) { msg.textContent = 'Passwords do not match.'; msg.className = 'status err'; return; }
+    msg.textContent = 'Creating your account…'; msg.className = 'status';
+    const r = await Cinder.login(name, pass, 'register');
+    if (r.ok) {
+      document.getElementById('form-reg').style.display = 'none';
+      document.getElementById('done-name').textContent = name;
+      document.getElementById('form-done').style.display = '';
+    } else { msg.textContent = r.msg || 'Registration failed — that name may be taken.'; msg.className = 'status err'; }
+  }
+  document.getElementById('r-go').addEventListener('click', go);
+  ['r-name', 'r-pass', 'r-pass2'].forEach((id) =>
+    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
+})();
+</script>
+</body>
+</html>
