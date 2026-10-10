@@ -7,24 +7,22 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<canvas id="embers"></canvas>
-<header class="site">
-  <a class="brand" href="index.html"><span class="crown">♛</span> Cinderrealm</a>
-  <nav class="main">
-    <a href="index.html">World</a>
-    <a href="hiscores.html">High Scores</a>
-    <a href="tradekeep.html" class="active">Tradekeep</a>
-    <a href="rules.html">Rules</a>
+<div class="topstrip"><span>World of Dunmere</span><span class="online">The realm's beating market</span></div>
+<div class="masthead">
+  <a class="logo" href="index.html">Cinderrealm<small>World of Dunmere</small></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html" class="active">Tradekeep</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
   </nav>
-  <div class="loginbox" data-login-ui></div>
-</header>
-<main>
-  <section class="block">
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel">
     <h2>The Tradekeep</h2>
-    <p class="sec-sub">The player-driven order-book marketplace of Dunmere</p>
-    <div class="card glow">
+    <div class="body">
+      <p>No king mints Dunmere's prices — its people do. The Tradekeep is a fully player-driven order-book marketplace run by clerks and bankers in Ironspire City and Sunfall. Post buy offers, list your wares, and watch the realm's economy breathe.</p>
       <div id="tk-gate">
-        <p style="line-height:1.7;margin-bottom:1rem">Live market data requires a hero's seal. Log in with your game account above to query the Tradekeep ledgers.</p>
+        <div class="notice">Log in with your game account above to query the live ledgers.</div>
       </div>
       <div id="tk-live" style="display:none">
         <div class="searchrow">
@@ -34,19 +32,13 @@
         <div id="tk-results"><p class="status">Enter a search to query live market data.</p></div>
       </div>
     </div>
-    <div class="card">
-      <h3>How it works</h3>
-      <p style="line-height:1.8;color:#d8cdb2">Clerks in Ironspire City and Sunfall record every offer posted by players. Buy offers and sell offers are matched by price — no shopkeepers, no fixed prices. The market you see is the market the realm made.</p>
-    </div>
-  </section>
-</main>
+  </div>
+</div>
 <footer>
-  <div class="heat"><span>World-Forge Heat Level:</span><span class="bar"><i></i></span><b style="color:var(--amber)">99.8%</b></div>
-  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a> · <a href="rules.html">Rules</a></div>
-  <div>Cinderrealm — World of Dunmere.</div>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
 </footer>
 <script src="js/common.js"></script>
-<script src="js/embers.js"></script>
 <script>
 (function () {
   const gate = document.getElementById('tk-gate');
@@ -71,11 +63,10 @@
         const price = r.price != null ? Number(r.price).toLocaleString() + ' gp' : '—';
         const qty = r.qty != null ? ' ×' + r.qty : '';
         const side = r.side ? ' <span class="status">[' + Cinder.esc(r.side) + ']</span>' : '';
-        return '<div class="trade"><span class="item">' + name + side + '<span class="qty">' + qty + '</span></span><span class="price">' + price + '</span></div>';
+        return '<div class="trade"><span>' + name + side + '<span class="status">' + qty + '</span></span><span class="price">' + price + '</span></div>';
       }).join('');
     } else if (m.t === 'bourse_price') {
-      const name = Cinder.esc(m.item || m.name || '');
-      results.innerHTML = '<div class="trade"><span class="item">' + name + '</span><span class="price">' +
+      results.innerHTML = '<div class="trade"><span>' + Cinder.esc(m.item || m.name || '') + '</span><span class="price">' +
         (m.price != null ? Number(m.price).toLocaleString() + ' gp' : 'no recent trades') + '</span></div>';
     } else if (m.t === 'bourse_err' || m.msg) {
       results.innerHTML = '<p class="status">' + Cinder.esc(m.msg || 'Market query failed.') + '</p>';
