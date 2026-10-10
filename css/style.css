@@ -43,11 +43,11 @@ a:hover { color: #fff; }
 }
 .masthead { text-align: center; }
 .masthead .logoimg img { height: 128px; width: auto; max-width: 92vw; display: block; margin: 0 auto; }
-.masthead .logoimg { display: block; padding: 14px 10px 16px; margin: 0 auto; max-width: 860px;
+.masthead .logoimg { display: flex; justify-content: center; align-items: center; padding: 18px 10px; margin: 0 auto; max-width: 860px;
   border: 1px solid var(--gold-dim);
   outline: 3px double var(--gold-dim);
   outline-offset: 5px;
-  background: radial-gradient(ellipse at 50% 40%, #1d150b 0%, #100c07 75%);
+  background: linear-gradient(180deg, #9a7443 0%, #7a5a33 55%, #5f4526 100%);
 }
 .masthead nav.bar { justify-content: center; margin-top: 18px; }
 nav.bar {
