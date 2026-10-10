@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>High Scores — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="embers"></canvas>
+<header class="site">
+  <a class="brand" href="index.html"><span class="crown">♛</span> Cinderrealm</a>
+  <nav class="main">
+    <a href="index.html">World</a>
+    <a href="hiscores.html" class="active">High Scores</a>
+    <a href="tradekeep.html">Tradekeep</a>
+    <a href="rules.html">Rules</a>
+  </nav>
+  <div class="loginbox" data-login-ui></div>
+</header>
+<main>
+  <section class="block">
+    <h2>High Scores</h2>
+    <p class="sec-sub">The legends of Dunmere, ranked by the realm scribes</p>
+    <div class="card glow">
+      <div class="notice" id="hiscores-note">
+        The scribes are still tallying the first age of heroes. Live rankings arrive with the next turning of the Forge — check back soon.
+      </div>
+      <table class="scores" id="hiscores-table" style="display:none">
+        <thead><tr><th>Rank</th><th>Hero</th><th>Discipline</th><th>Level</th><th>Experience</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="heat"><span>World-Forge Heat Level:</span><span class="bar"><i></i></span><b style="color:var(--amber)">99.8%</b></div>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a> · <a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere.</div>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/embers.js"></script>
+<script>
+// Wired for the future high-scores API: GET https://cinderrealm.onrender.com/api/hiscores?skill=<skill>
+// Expected: [{rank, name, skill, level, xp}, ...]
+(function () {
+  async function load(skill) {
+    try {
+      const r = await fetch('https://cinderrealm.onrender.com/api/hiscores?skill=' + encodeURIComponent(skill || 'total'));
+      if (!r.ok) throw 0;
+      const rows = await r.json();
+      const tb = document.querySelector('#hiscores-table tbody');
+      tb.innerHTML = rows.map((x) =>
+        '<tr><td>' + x.rank + '</td><td>' + Cinder.esc(x.name) + '</td><td>' + Cinder.esc(x.skill) +
+        '</td><td>' + x.level + '</td><td>' + Number(x.xp).toLocaleString() + '</td></tr>').join('');
+      document.getElementById('hiscores-table').style.display = '';
+      document.getElementById('hiscores-note').style.display = 'none';
+    } catch (e) { /* API not live yet — keep the coming-soon notice */ }
+  }
+  load('total');
+})();
+</script>
+</body>
+</html>
