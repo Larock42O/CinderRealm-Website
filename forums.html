@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forums — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/style.css?v=14">
 <style>
 .forum-cat { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); }
 .forum-cat:last-child { border-bottom:none; }
@@ -183,11 +183,25 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
     const b = document.getElementById('newthread');
     if (b) b.addEventListener('click', () => {
       if (!Cinder.authed) { needLogin(); return; }
-      const t = prompt('Thread title:');
-      if (!t) return;
-      const body = prompt('Opening post:');
-      if (body === null) return;
-      post('/api/forums/thread', { category: id, title: t, body })
+      showNewThread(id, c.name);
+    });
+  }
+  function showNewThread(catId, catName) {
+    title.textContent = 'New Thread';
+    view.innerHTML =
+      '<div class="crumb" style="padding:12px 14px 0"><a href="forums.html">Forums</a> → ' +
+      '<a href="forums.html?cat=' + encodeURIComponent(catId) + '">' + esc(catName) + '</a> → New Thread</div>' +
+      '<div style="padding:14px;max-width:640px">' +
+      '<label style="display:block;margin-bottom:6px;color:var(--gold-hi)">Thread title</label>' +
+      '<input class="forum" id="threadtitle" maxlength="120" placeholder="Give your thread a title…">' +
+      '<label style="display:block;margin:14px 0 6px;color:var(--gold-hi)">Opening post</label>' +
+      '<textarea class="forum" id="threadbody" placeholder="Write your opening post…"></textarea>' +
+      '<div style="margin-top:14px"><button class="btn" id="postthread">Post Thread</button></div></div>';
+    document.getElementById('postthread').addEventListener('click', () => {
+      const t = document.getElementById('threadtitle').value.trim();
+      const body = document.getElementById('threadbody').value.trim();
+      if (!t || !body) return;
+      post('/api/forums/thread', { category: catId, title: t, body })
         .then((r) => { location.href = 'forums.html?thread=' + r.id; })
         .catch(() => alert('The forum halls are still being built — try again after the next server update.'));
     });
