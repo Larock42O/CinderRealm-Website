@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CinderRealm - MMORPG Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold-bright: #f0c352;
+      --gold-mid: #c89528;
+      --gold-dark: #7a5410;
+      --ember-red: #d3381a;
+      --ember-orange: #f86a21;
+      --bg-dark: #070504;
+      --panel-bg: rgba(16, 12, 10, 0.88);
+      --panel-border: #3d2c1d;
+      --text-light: #e8dbce;
+      --text-muted: #8c7a6b;
+      --font-title: 'Cinzel Decorative', 'Cinzel', serif;
+      --font-body: 'Cinzel', serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      font-family: var(--font-body);
+      color: var(--text-light);
+    }
+
+    /* Canvas Background */
+    #bg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Vignette & Glow Overlays */
+    .overlay-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(3, 2, 2, 0.85) 80%, rgba(0, 0, 0, 0.98) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .overlay-ember-glow {
+      position: absolute;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 300px;
+      background: radial-gradient(ellipse at bottom, rgba(211, 56, 26, 0.25) 0%, rgba(248, 106, 33, 0.1) 40%, transparent 70%);
+      z-index: 2;
+      pointer-events: none;
+      filter: blur(40px);
+    }
+
+    /* Top Navigation Bar */
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      padding: 0 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .build-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(20, 15, 12, 0.8);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      color: var(--gold-mid);
+      text-transform: uppercase;
+    }
+
+    .build-badge svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--gold-mid);
+    }
+
+    .utility-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(20, 15, 12, 0.8);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--gold-mid);
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      box-shadow: 0 0 10px rgba(240, 195, 82, 0.2);
+    }
+
+    /* Main Container */
+    .main-wrapper {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Title Insertion Container */
+    .title-insertion-slot {
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .title-logo {
+      width: min(360px, 82vw);
+      height: auto;
+      filter: drop-shadow(0 4px 18px rgba(0,0,0,0.9)) drop-shadow(0 0 24px rgba(240,195,82,0.15));
+    }
+
+    /* Main Login Panel Frame */
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9),
+                  inset 0 0 30px rgba(0, 0, 0, 0.8),
+                  0 0 15px rgba(200, 149, 40, 0.1);
+      padding: 28px;
+      position: relative;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Decorative Corner Brackets */
+    .corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: var(--gold-mid);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .corner-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .corner-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    /* Tabs */
+    .card-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--panel-border);
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tab-btn.active {
+      color: var(--gold-bright);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      color: var(--gold-mid);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+      transition: fill 0.2s;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 12px 12px 38px;
+      background: rgba(8, 6, 5, 0.8);
+      border: 1px solid #2a1f15;
+      border-radius: 4px;
+      color: var(--text-light);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--gold-mid);
+      box-shadow: 0 0 10px rgba(200, 149, 40, 0.2);
+    }
+
+    .form-input:focus + .input-icon,
+    .form-input:focus ~ .input-icon {
+      fill: var(--gold-bright);
+    }
+
+    /* Single Server Status Card */
+    .server-status-card {
+      background: rgba(10, 8, 7, 0.6);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .server-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .server-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    .server-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .high-load-tag {
+      background: rgba(180, 83, 9, 0.2);
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      color: #fbbf24;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Options Row */
+    .options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      font-size: 0.8rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .remember-me input {
+      accent-color: var(--gold-mid);
+    }
+
+    .forgot-link {
+      color: var(--gold-mid);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .forgot-link:hover {
+      color: var(--gold-bright);
+      text-decoration: underline;
+    }
+
+    /* Enter Realm Button (No icon) */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(180deg, #8a1f11 0%, #521006 100%);
+      border: 1px solid var(--ember-red);
+      border-radius: 4px;
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 900;
+      font-size: 1.05rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(180deg, #a82717 0%, #691508 100%);
+      border-color: var(--ember-orange);
+      box-shadow: 0 0 20px rgba(248, 106, 33, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Footer Info */
+    .bottom-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      padding: 0 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      z-index: 10;
+    }
+
+    /* Drawer / Modal Panels */
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 380px;
+      height: 100%;
+      background: rgba(12, 9, 8, 0.95);
+      border-left: 1px solid var(--panel-border);
+      z-index: 100;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    .drawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
+    }
+
+    .drawer-title {
+      font-family: var(--font-title);
+      color: var(--gold-bright);
+      font-size: 1.1rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .close-btn:hover {
+      color: var(--gold-bright);
+    }
+
+    .news-item {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed rgba(61, 44, 29, 0.5);
+    }
+
+    .news-date {
+      font-size: 0.7rem;
+      color: var(--gold-dark);
+      margin-bottom: 4px;
+    }
+
+    .news-title {
+      font-size: 0.9rem;
+      color: var(--gold-mid);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .news-body {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Particle Ember Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Visual Overlays -->
+  <div class="overlay-vignette"></div>
+  <div class="overlay-ember-glow"></div>
+
+  <!-- Top Bar Controls -->
+  <header class="top-bar">
+    <div class="build-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-5.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8remz"/></svg>
+      <span>Alpha Build 1.0.4</span>
+    </div>
+    <div class="utility-btns">
+      <button class="icon-btn" id="news-toggle" title="Patch Chronicles">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      </button>
+      <button class="icon-btn" id="audio-toggle" title="Toggle Ambience Sound">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+      </button>
+      <button class="icon-btn" id="settings-toggle" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Center Authentication Container -->
+  <main class="main-wrapper">
+
+    <div class="title-insertion-slot">
+      <img src="img/logo.png?v=6" alt="CinderRealm" class="title-logo">
+    </div>
+
+    <!-- Login Frame -->
+    <div class="login-card">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+
+      <div class="card-tabs">
+        <button class="tab-btn active" id="tab-login">Enter Realm</button>
+        <button class="tab-btn" id="tab-register">Forge Account</button>
+      </div>
+
+      <form id="auth-form" onsubmit="event.preventDefault();">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <div class="input-wrapper">
+            <input type="text" id="username" class="form-input" placeholder="Enter your username" required autocomplete="username">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+          </div>
+        </div>
+
+        <!-- Single Server Card Indicator -->
+        <div class="server-status-card">
+          <div class="server-info">
+            <div class="status-indicator"></div>
+            <div>
+              <div class="server-name">CinderRealm Main</div>
+              <div class="server-meta">Status: <span style="color:#22c55e;">Online</span> | Ping: 22 ms</div>
+            </div>
+          </div>
+          <div class="high-load-tag">HIGH LOAD</div>
+        </div>
+
+        <div class="options-row">
+          <label class="remember-me">
+            <input type="checkbox" checked>
+            <span>Remember Credentials</span>
+          </label>
+          <a href="#" class="forgot-link">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          ENTER REALM
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Bottom Bar Info -->
+  <footer class="bottom-bar">
+    <div>Server: <span style="color: var(--gold-mid);">CinderRealm Main</span> (22ms)</div>
+    <div>&copy; 2026 CinderRealm MMORPG</div>
+  </footer>
+
+  <!-- News & Chronicles Drawer -->
+  <div class="drawer" id="news-drawer">
+    <div class="drawer-header">
+      <h3 class="drawer-title">Patch Chronicles</h3>
+      <button class="close-btn" id="news-close">&times;</button>
+    </div>
+    <div class="news-list">
+      <div class="news-item">
+        <div class="news-date">OCTOBER 10, 2026</div>
+        <div class="news-title">Alpha Build 1.0.4 Deployed</div>
+        <div class="news-body">Refined ember particle calculations, enhanced server connectivity, and finalized character credential verification.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">OCTOBER 02, 2026</div>
+        <div class="news-title">The Ashen Gate Opens</div>
+        <div class="news-body">Welcome to the CinderRealm closed testing build. Prepare your weapons for dark fantasy exploration.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Particle Engine Canvas Animation
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    class EmberParticle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 20;
+        this.size = Math.random() * 2.5 + 0.5;
+        this.speedY = Math.random() * 1.5 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.8;
+        this.opacity = Math.random() * 0.8 + 0.2;
+        this.fadeSpeed = Math.random() * 0.005 + 0.002;
+        this.color = Math.random() > 0.4 ? '#f86a21' : '#d3381a';
+      }
+
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX + Math.sin(this.y * 0.01) * 0.3;
+        this.opacity -= this.fadeSpeed;
+
+        if (this.y < 0 || this.opacity <= 0) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.opacity;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    const embers = Array.from({ length: 90 }, () => new EmberParticle());
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      embers.forEach(ember => {
+        ember.update();
+        ember.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // UI Tab Switcher Logic
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const submitBtn = document.getElementById('submit-btn');
+
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      submitBtn.textContent = 'ENTER REALM';
+    });
+
+    tabRegister.addEventListener('click', () => {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      submitBtn.textContent = 'FORGE ACCOUNT';
+    });
+
+    // Drawer Toggles
+    const newsToggle = document.getElementById('news-toggle');
+    const newsDrawer = document.getElementById('news-drawer');
+    const newsClose = document.getElementById('news-close');
+
+    newsToggle.addEventListener('click', () => newsDrawer.classList.toggle('open'));
+    newsClose.addEventListener('click', () => newsDrawer.classList.remove('open'));
+  </script>
+</body>
+</html>
