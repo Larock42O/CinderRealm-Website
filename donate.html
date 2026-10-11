@@ -73,7 +73,9 @@
  * his PayPal dashboard. Client ID is publishable (safe in page source). */
 (function () {
   /* Founders' Wall — add { name, tier } entries as donations are granted. */
-  const FOUNDERS = [];
+  const FOUNDERS = [
+    { name: 'Larock420', tier: 'Founder' },
+  ];
   const wall = document.getElementById('founders-wall');
   if (wall) {
     wall.innerHTML = FOUNDERS.length
