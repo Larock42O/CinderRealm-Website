@@ -471,6 +471,60 @@
       color: var(--text-muted);
       line-height: 1.4;
     }
+
+    /* Auth feedback */
+    .auth-error {
+      display: none;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      background: rgba(211, 56, 26, 0.12);
+      border: 1px solid rgba(211, 56, 26, 0.5);
+      border-radius: 4px;
+      color: #f0a08a;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    .auth-error.show { display: block; }
+    .auth-ok {
+      display: none;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.45);
+      border-radius: 4px;
+      color: #9fe6b8;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    .auth-ok.show { display: block; }
+    .submit-btn.busy { opacity: 0.6; pointer-events: none; }
+
+    /* Small screens: stop the overlaps */
+    @media (max-width: 640px) {
+      body, html { overflow-y: auto; }
+      .top-bar { padding: 0 12px; top: 10px; }
+      .build-badge { font-size: 0.6rem; padding: 5px 9px; letter-spacing: 1px; gap: 6px; }
+      .utility-btns { gap: 8px; }
+      .icon-btn { width: 32px; height: 32px; }
+      .main-wrapper {
+        justify-content: flex-start;
+        height: auto;
+        min-height: 100%;
+        padding: 84px 16px 110px;
+      }
+      .title-insertion-slot { margin-bottom: 12px; }
+      .title-logo { width: min(230px, 68vw); }
+      .login-card { padding: 20px; }
+      .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        padding: 8px 12px;
+        font-size: 0.62rem;
+        background: rgba(7, 5, 4, 0.9);
+        border-top: 1px solid var(--panel-border);
+      }
+      .drawer { width: min(380px, 94vw); padding: 22px; }
+    }
   </style>
 </head>
 <body>
@@ -540,14 +594,17 @@
         <!-- Single Server Card Indicator -->
         <div class="server-status-card">
           <div class="server-info">
-            <div class="status-indicator"></div>
+            <div class="status-indicator" id="status-dot"></div>
             <div>
               <div class="server-name">CinderRealm Main</div>
-              <div class="server-meta">Status: <span style="color:#22c55e;">Online</span> | Ping: 22 ms</div>
+              <div class="server-meta">Status: <span id="status-text" style="color:#22c55e;">Online</span> | Ping: <span id="ping-val">…</span> ms</div>
             </div>
           </div>
           <div class="high-load-tag">HIGH LOAD</div>
         </div>
+
+        <div class="auth-error" id="auth-error"></div>
+        <div class="auth-ok" id="auth-ok"></div>
 
         <div class="options-row">
           <label class="remember-me">
@@ -566,7 +623,7 @@
 
   <!-- Bottom Bar Info -->
   <footer class="bottom-bar">
-    <div>Server: <span style="color: var(--gold-mid);">CinderRealm Main</span> (22ms)</div>
+    <div>Server: <span style="color: var(--gold-mid);">CinderRealm Main</span> (<span id="ping-val2">…</span>ms)</div>
     <div>&copy; 2026 CinderRealm MMORPG</div>
   </footer>
 
@@ -578,14 +635,19 @@
     </div>
     <div class="news-list">
       <div class="news-item">
-        <div class="news-date">OCTOBER 10, 2026</div>
-        <div class="news-title">Alpha Build 1.0.4 Deployed</div>
-        <div class="news-body">Refined ember particle calculations, enhanced server connectivity, and finalized character credential verification.</div>
+        <div class="news-date">OCTOBER 11, 2026</div>
+        <div class="news-title">100 Players Strong</div>
+        <div class="news-body">Load testing confirms 100 concurrent players with zero issues. Work is underway to keep 200+ players smooth with no lag or disconnects.</div>
       </div>
       <div class="news-item">
-        <div class="news-date">OCTOBER 02, 2026</div>
-        <div class="news-title">The Ashen Gate Opens</div>
-        <div class="news-body">Welcome to the CinderRealm closed testing build. Prepare your weapons for dark fantasy exploration.</div>
+        <div class="news-date">OCTOBER 10, 2026</div>
+        <div class="news-title">Official Website Live</div>
+        <div class="news-body">The CinderRealm website is live — news, hiscores, forums, polls, and donations for the realm's keepers.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">OCTOBER 09, 2026</div>
+        <div class="news-title">Interest Management</div>
+        <div class="news-body">A networking upgrade keeps crowded areas running smooth, and the continent's coastline has been reshaped.</div>
       </div>
     </div>
   </div>
@@ -658,18 +720,135 @@
     const tabLogin = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
     const submitBtn = document.getElementById('submit-btn');
+    const authForm = document.getElementById('auth-form');
+    const usernameEl = document.getElementById('username');
+    const passwordEl = document.getElementById('password');
+    const errBox = document.getElementById('auth-error');
+    const okBox = document.getElementById('auth-ok');
+    let authMode = 'login'; // 'login' | 'register'
+    let authedName = null;
 
-    tabLogin.addEventListener('click', () => {
-      tabLogin.classList.add('active');
-      tabRegister.classList.remove('active');
-      submitBtn.textContent = 'ENTER REALM';
+    const WS_URL = 'wss://cinderrealm.onrender.com/ws-game';
+    const GAME_URL = 'https://cinderrealm.onrender.com';
+
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.classList.add('show');
+      okBox.classList.remove('show');
+    }
+    function showOk(msg) {
+      okBox.textContent = msg;
+      okBox.classList.add('show');
+      errBox.classList.remove('show');
+    }
+    function clearMsgs() {
+      errBox.classList.remove('show');
+      okBox.classList.remove('show');
+    }
+
+    function setMode(mode) {
+      authMode = mode;
+      clearMsgs();
+      const isLogin = mode === 'login';
+      tabLogin.classList.toggle('active', isLogin);
+      tabRegister.classList.toggle('active', !isLogin);
+      submitBtn.textContent = authedName ? 'PLAY NOW' : (isLogin ? 'ENTER REALM' : 'FORGE ACCOUNT');
+    }
+    tabLogin.addEventListener('click', () => setMode('login'));
+    tabRegister.addEventListener('click', () => setMode('register'));
+
+    // Remembered username only — never the password.
+    try {
+      const saved = localStorage.getItem('cinder_preview_user');
+      if (saved) usernameEl.value = saved;
+    } catch (e) {}
+
+    // Verify-only auth against the live server: proves the credentials but
+    // NEVER joins the world (no hello). The game client handles world entry.
+    function verifyAccount(name, pass, mode) {
+      return new Promise((resolve) => {
+        let done = false;
+        const finish = (ok, msg) => {
+          if (done) return; done = true;
+          try { ws.close(); } catch (e) {}
+          resolve({ ok, msg });
+        };
+        let ws;
+        try { ws = new WebSocket(WS_URL); } catch (e) { finish(false, 'Could not reach the game server.'); return; }
+        const to = setTimeout(() => finish(false, 'The server is waking up — try again in about a minute.'), 25000);
+        ws.onopen = () => { ws.send(JSON.stringify({ t: mode, name, pass })); };
+        ws.onerror = () => { clearTimeout(to); finish(false, 'Could not reach the game server.'); };
+        ws.onmessage = (ev) => {
+          let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+          if (m.t === 'auth_ok') { clearTimeout(to); finish(true); }
+          else if (m.t === 'auth_err') { clearTimeout(to); finish(false, m.msg || 'Login failed.'); }
+        };
+      });
+    }
+
+    authForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      clearMsgs();
+      // Already verified? Then this button launches the game.
+      if (authedName) {
+        window.location.href = GAME_URL;
+        return;
+      }
+      const name = usernameEl.value.trim();
+      const pass = passwordEl.value;
+      if (!name || !pass) { showError('Enter your username and password.'); return; }
+      if (authMode === 'register' && !/^[A-Za-z0-9_ ]{3,16}$/.test(name)) {
+        showError('Character names must be 3–16 characters: letters, numbers, spaces, underscores.');
+        return;
+      }
+      submitBtn.classList.add('busy');
+      submitBtn.textContent = authMode === 'register' ? 'FORGING…' : 'VERIFYING…';
+      const r = await verifyAccount(name, pass, authMode);
+      submitBtn.classList.remove('busy');
+      if (r.ok) {
+        authedName = name;
+        try {
+          const remember = authForm.querySelector('.remember-me input').checked;
+          if (remember) localStorage.setItem('cinder_preview_user', name);
+          else localStorage.removeItem('cinder_preview_user');
+        } catch (e) {}
+        showOk(authMode === 'register'
+          ? 'Account forged. Welcome to Dunmere, ' + name + '.'
+          : 'Welcome back, ' + name + '.');
+        submitBtn.textContent = 'PLAY NOW';
+      } else {
+        showError(r.msg || 'Could not verify those credentials.');
+        submitBtn.textContent = authMode === 'register' ? 'FORGE ACCOUNT' : 'ENTER REALM';
+      }
     });
 
-    tabRegister.addEventListener('click', () => {
-      tabRegister.classList.add('active');
-      tabLogin.classList.remove('active');
-      submitBtn.textContent = 'FORGE ACCOUNT';
-    });
+    // Live ping + status from the real server.
+    const pingVal = document.getElementById('ping-val');
+    const pingVal2 = document.getElementById('ping-val2');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    async function pingServer() {
+      const t0 = performance.now();
+      try {
+        await fetch(GAME_URL + '/', { mode: 'no-cors', cache: 'no-store' });
+        const ms = Math.round(performance.now() - t0);
+        pingVal.textContent = ms;
+        pingVal2.textContent = ms;
+        statusDot.style.background = '#22c55e';
+        statusDot.style.boxShadow = '0 0 8px #22c55e';
+        statusText.textContent = 'Online';
+        statusText.style.color = '#22c55e';
+      } catch (e) {
+        pingVal.textContent = '—';
+        pingVal2.textContent = '—';
+        statusDot.style.background = '#d3381a';
+        statusDot.style.boxShadow = '0 0 8px #d3381a';
+        statusText.textContent = 'Unreachable';
+        statusText.style.color = '#d3381a';
+      }
+    }
+    pingServer();
+    setInterval(pingServer, 15000);
 
     // Drawer Toggles
     const newsToggle = document.getElementById('news-toggle');
