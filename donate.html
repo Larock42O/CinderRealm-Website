@@ -48,6 +48,13 @@
     </div>
   </div>
   <div class="panel">
+    <h2>The Founders' Wall</h2>
+    <div class="body">
+      <p>Every Flamebearer and Forge Patron is etched here — the heroes who kept the Forge lit in the early days.</p>
+      <div id="founders-wall" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="panel">
     <h2>The Road to Members</h2>
     <div class="body">
       <p>When donations have carried the realm to stability, the members world opens its gates: new skills, new quests, new monsters, and new lands on the map — a whole second age of Dunmere, funded by the heroes who believed first.</p>
@@ -65,6 +72,15 @@
  * the order as custom_id so Jacob can match every payment to a character in
  * his PayPal dashboard. Client ID is publishable (safe in page source). */
 (function () {
+  /* Founders' Wall — add { name, tier } entries as donations are granted. */
+  const FOUNDERS = [];
+  const wall = document.getElementById('founders-wall');
+  if (wall) {
+    wall.innerHTML = FOUNDERS.length
+      ? FOUNDERS.map((f) => '<span style="border:1px solid var(--gold-dim);border-radius:20px;padding:6px 14px;color:var(--gold-hi)">' +
+          Cinder.esc(f.name) + ' <span class="status">· ' + Cinder.esc(f.tier) + '</span></span>').join('')
+      : '<span class="status"><i>No names etched yet — the first Flamebearer will be legend.</i></span>';
+  }
   const TIERS = [
     { el: 'pp-sparkkeeper', name: 'Sparkkeeper',  amount: '5.00'  },
     { el: 'pp-flamebearer', name: 'Flamebearer',  amount: '15.00' },
