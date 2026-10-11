@@ -125,8 +125,34 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
   const q = new URLSearchParams(location.search);
   const cat = q.get('cat'), thread = q.get('thread'), guide = q.get('guide'), pinned = q.get('pinned');
   const PINNED = {
+    general: [
+      { t: "Welcome to General Discussion", by: "Jarvis", badge: "♛ Moderator", badgeColor: "var(--ember)", locked: true, b: `
+      <p>Welcome to General Discussion — the tavern floor of the realm forums.</p>
+      <p>This is the place for adventures, stories, and chatter about all things Dunmere. Defeated a boss? Found a hidden corner of the map? Pull up a chair and tell the tale.</p>
+      <p>Keep it civil, keep it on-topic-ish, and mind the Forum Law. New threads open for everyone once the forum halls are finished.</p>
+      <p>— Jarvis</p>` },
+    ],
+    help: [
+      { t: "How to Use Help & Guides", by: "Jarvis", badge: "♛ Moderator", badgeColor: "var(--ember)", locked: true, b: `
+      <p>New hero? You're in the right place. The pinned guides above cover your first hour, skills, combat, coins, and getting around — read those first.</p>
+      <p>Still stuck? Ask here once player threads open. Veterans: this is where your wisdom belongs — a good answer here echoes for every hero who comes after.</p>
+      <p>— Jarvis</p>` },
+    ],
+    trade: [
+      { t: "How the Trading Post Works", by: "Jarvis", badge: "♛ Moderator", badgeColor: "var(--ember)", locked: true, b: `
+      <p>The Tradekeep handles most trade automatically — but some deals need a personal touch. Use this forum to arrange player-to-player trades: bulk resource deals, rare item sales, crafting commissions.</p>
+      <p>Tips: state what you're selling, what you want, and where you'll meet. Check Tradekeep prices first so nobody gets burned.</p>
+      <p>No real-world trading — ever. That's the fastest way to lose posting rights, and worse.</p>
+      <p>— Jarvis</p>` },
+    ],
+    clans: [
+      { t: "Clans & Fellowships — Start Here", by: "Jarvis", badge: "♛ Moderator", badgeColor: "var(--ember)", locked: true, b: `
+      <p>Dunmere is better with company. This forum is for recruiting and finding your people: post your clan's name, what you're about — monster hunting, skilling, delving, or braving the Outlands — and how to join.</p>
+      <p>Flying solo and looking for a crew? Introduce yourself. Someone's always recruiting.</p>
+      <p>— Jarvis</p>` },
+    ],
     offtopic: [
-      { t: "Welcome", by: "Larock420", owner: true, locked: true, b: `
+      { t: "Welcome", by: "Larock420", badge: "👑 Owner", badgeColor: "var(--gold-hi)", locked: true, b: `
       <p>Welcome to Cinderrealm! 🍻</p>
       <p>This whole project started as a way to learn game development — and to chase the feeling of those late nights spent grinding in the classics growing up. I wanted to bottle a little of that nostalgia and share it.</p>
       <p>If you're reading this, you're officially one of the first heroes of Dunmere, and that means a lot. Take your time, explore, break things (gently), and most importantly — have fun.</p>
@@ -134,6 +160,10 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
       <p>Questions, ideas, or bug reports? Reach me anytime at <a href="mailto:Cinderrealms@gmail.com">Cinderrealms@gmail.com</a></p>
       <p>See you in the realm ✌️</p>
       <p>— Larock420</p>` },
+      { t: "The Cold Hearth — What Goes Here", by: "Jarvis", badge: "♛ Moderator", badgeColor: "var(--ember)", locked: true, b: `
+      <p>The Cold Hearth is the off-topic corner: talk about anything that doesn't fit elsewhere. Other games, your setup, your day — it's all welcome.</p>
+      <p>Two rules travel with you: keep it civil, keep it clean. The Forum Law applies here like everywhere else.</p>
+      <p>— Jarvis</p>` },
     ],
   };
 
@@ -191,7 +221,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
       if (PINNED[id]) {
         guideThreads += PINNED[id].map((p, i) =>
           '<div class="thread"><div><a class="t" href="forums.html?pinned=' + id + ':' + i + '">🔒 ' + esc(p.t) + '</a>' +
-          '<div class="by">by ' + esc(p.by) + ' <span style="color:var(--gold-hi)">👑 Owner</span></div></div>' +
+          '<div class="by">by ' + esc(p.by) + ' <span style="color:' + (p.badgeColor || 'var(--gold-hi)') + '">' + esc(p.badge || '') + '</span></div></div>' +
           '<div class="by">pinned · locked</div></div>').join('');
       }
       html += guideThreads + '<div class="notice" style="margin:14px">The forum halls are being built — player threads open with the next server update.</div>';
@@ -269,7 +299,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
     view.innerHTML =
       '<div class="crumb" style="padding:12px 14px 0"><a href="forums.html">Forums</a> → ' +
       '<a href="forums.html?cat=' + encodeURIComponent(parts[0]) + '">' + esc(c.name) + '</a> → ' + esc(p.t) + '</div>' +
-      '<div class="post"><div class="who"><b>' + esc(p.by) + '</b><span style="color:var(--gold-hi)">👑 Owner</span></div>' +
+      '<div class="post"><div class="who"><b>' + esc(p.by) + '</b><span style="color:' + (p.badgeColor || 'var(--gold-hi)') + '">' + esc(p.badge || '') + '</span></div>' +
       '<div class="what">' + p.b + '<div class="when">Pinned thread · 🔒 locked</div></div></div>' +
       '<div class="notice" style="margin:14px">🔒 This thread is locked — replies are disabled.</div>';
   }
