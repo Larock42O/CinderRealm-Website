@@ -241,3 +241,12 @@ footer a:hover { color: var(--gold-hi); }
 .skillicon img { width: 26px; height: 26px; }
 .skillcard h3 { margin: 0 0 4px; font-size: 15px; color: var(--parch); }
 .skillcard p { margin: 0; font-size: 12.5px; color: var(--parch-dim); line-height: 1.5; }
+
+/* Forum composer */
+textarea.forum, input.forum {
+  width: 100%; box-sizing: border-box; background: #0c0b09;
+  border: 1px solid var(--line); color: var(--parch);
+  border-radius: 8px; padding: 10px 12px; font-size: 15px; font-family: inherit;
+}
+textarea.forum:focus, input.forum:focus { outline: none; border-color: var(--gold-hi); }
+textarea.forum { min-height: 140px; resize: vertical; }
