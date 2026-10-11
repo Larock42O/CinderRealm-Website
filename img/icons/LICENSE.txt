@@ -1,0 +1,4 @@
+Skill icons for Cinderrealm.
+Drawn in the Lucide icon style (ISC License, https://lucide.dev).
+Lucide is free for commercial use, including the ISC-licensed path data
+this set is based on. No third-party game assets are used.
