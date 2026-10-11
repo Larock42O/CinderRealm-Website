@@ -123,7 +123,19 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
       </ul>` },
   ];
   const q = new URLSearchParams(location.search);
-  const cat = q.get('cat'), thread = q.get('thread'), guide = q.get('guide');
+  const cat = q.get('cat'), thread = q.get('thread'), guide = q.get('guide'), pinned = q.get('pinned');
+  const PINNED = {
+    offtopic: [
+      { t: "Welcome", by: "larock420", owner: true, locked: true, b: `
+      <p>Welcome to Project Cinder Realm 😎 I decided to make this project out of learning and also recreating nostalgia from my younger days !</p>
+      <p>I'm really hoping that whoever reads this also can experience the same nostalgic feel that I am and enjoy your time around the website/game</p>
+      <p>Currently running this as a solo developer so it has been quite the unique experience</p>
+      <p>Maybe we will run into eachother in game !</p>
+      <p>If you have any questions or concerns, please email me at <a href="mailto:Cinderrealms@gmail.com">Cinderrealms@gmail.com</a></p>
+      <p>Have fun and enjoy 😎✌️</p>
+      <p>— Larock</p>` },
+    ],
+  };
 
   function esc(s) { return Cinder.esc(s); }
   function needLogin() {
@@ -151,7 +163,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
         '<div class="counts">' + (c.threads || 0) + ' threads<br>' + (c.posts || 0) + ' posts</div></div>').join('');
     } catch (e) {
       view.innerHTML = CATS.map((c) => {
-        const tc = c.id === 'help' ? GUIDES.length + ' pinned' : '—';
+        const tc = c.id === 'help' ? GUIDES.length + ' pinned' : (PINNED[c.id] ? PINNED[c.id].length + ' pinned' : '—');
         return '<div class="forum-cat"><div><h3><a href="forums.html?cat=' + c.id + '">' + esc(c.name) + '</a></h3><p>' + esc(c.desc) + '</p></div>' +
         '<div class="counts">' + tc + ' threads<br>— posts</div></div>';
       }).join('') +
@@ -175,6 +187,12 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
           '<div class="thread"><div><a class="t" href="forums.html?guide=' + i + '">📌 ' + esc(g.t) + '</a>' +
           '<div class="by">by Jarvis <span style="color:var(--ember)">♛ Moderator</span></div></div>' +
           '<div class="by">pinned</div></div>').join('');
+      }
+      if (PINNED[id]) {
+        guideThreads += PINNED[id].map((p, i) =>
+          '<div class="thread"><div><a class="t" href="forums.html?pinned=' + id + ':' + i + '">🔒 ' + esc(p.t) + '</a>' +
+          '<div class="by">by ' + esc(p.by) + ' <span style="color:var(--gold-hi)">👑 Owner</span></div></div>' +
+          '<div class="by">pinned · locked</div></div>').join('');
       }
       html += guideThreads + '<div class="notice" style="margin:14px">The forum halls are being built — player threads open with the next server update.</div>';
     }
@@ -241,7 +259,22 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
       '<div class="what">' + g.b + '<div class="when">Pinned guide</div></div></div>' +
       '<div class="notice" style="margin:14px">Replies open with the next server update.</div>';
   }
-  if (guide !== null && guide !== undefined && guide !== '') showGuide(guide);
+  function showPinned(key) {
+    const parts = (key || '').split(':');
+    const list = PINNED[parts[0]] || [];
+    const p = list[+parts[1]];
+    if (!p) { showIndex(); return; }
+    const c = CATS.find((x) => x.id === parts[0]) || { name: 'Forum' };
+    title.textContent = p.t;
+    view.innerHTML =
+      '<div class="crumb" style="padding:12px 14px 0"><a href="forums.html">Forums</a> → ' +
+      '<a href="forums.html?cat=' + encodeURIComponent(parts[0]) + '">' + esc(c.name) + '</a> → ' + esc(p.t) + '</div>' +
+      '<div class="post"><div class="who"><b>' + esc(p.by) + '</b><span style="color:var(--gold-hi)">👑 Owner</span></div>' +
+      '<div class="what">' + p.b + '<div class="when">Pinned thread · 🔒 locked</div></div></div>' +
+      '<div class="notice" style="margin:14px">🔒 This thread is locked — replies are disabled.</div>';
+  }
+  if (pinned !== null && pinned !== undefined && pinned !== '') showPinned(pinned);
+  else if (guide !== null && guide !== undefined && guide !== '') showGuide(guide);
   else if (thread) showThread(thread);
   else if (cat) showCat(cat);
   else showIndex();
