@@ -1,16 +1,20 @@
-/* Cinderrealm — realm-site style. Structure inspired by classic MMO fansites; all visuals original. */
+/* Cinderrealm — realm-site style. Structure inspired by classic MMO fansites; all visuals original.
+   Visual language unified with the game login page: ember-and-gold on near-black, Cinzel display type. */
 :root {
   --gold: #c9a227;
   --gold-hi: #e8c547;
+  --gold-bright: #f0c352;
   --gold-dim: #6e5a1e;
   --ember: #ff7a1a;
-  --parch: #d8c9a3;
-  --parch-dim: #a89a72;
+  --ember-red: #d3381a;
+  --ember-orange: #f86a21;
+  --parch: #e8dbce;
+  --parch-dim: #8c7a6b;
   --ink: #14100a;
-  --bg: #0e0d0b;
-  --panel: #191712;
-  --panel2: #201d16;
-  --line: #3a3325;
+  --bg: #070504;
+  --panel: #100c0a;
+  --panel2: #161110;
+  --line: #3d2c1d;
   --ice: #7fd4e8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,8 +25,15 @@ body {
   font-size: 14px;
   background-image: radial-gradient(ellipse at 50% 0%, rgba(255,122,26,0.05), transparent 55%);
 }
+/* Ember particle canvas + vignette sit behind everything (see js/embers.js) */
+#ember-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at center, transparent 55%, rgba(3,2,2,0.55) 100%);
+}
+.wrap, .topstrip, .masthead, footer { position: relative; z-index: 1; }
 h1, h2, h3, .masthead .logo, .btn {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
 }
 a { color: var(--gold-hi); }
 a:hover { color: #fff; }
@@ -65,19 +76,22 @@ nav.bar a:hover, nav.bar a.active { background: var(--panel2); color: var(--gold
   padding: 5px 8px; border-radius: 3px; font-family: inherit; font-size: 12px; width: 130px;
 }
 
-/* buttons */
+/* buttons — login-page language */
 .btn {
-  background: linear-gradient(180deg, #a8842c, #6e5a1e);
-  color: #ffe9b0; border: 1px solid #8a6f2a; border-radius: 4px;
-  padding: 7px 18px; font-variant: small-caps; letter-spacing: 1px; cursor: pointer;
-  text-decoration: none; display: inline-block; font-size: 15px;
+  background: linear-gradient(180deg, #8a6a20, #5a4512);
+  color: #ffe9b0; border: 1px solid var(--gold-dim); border-radius: 4px;
+  padding: 7px 18px; font-variant: small-caps; letter-spacing: 2px; cursor: pointer;
+  text-decoration: none; display: inline-block; font-size: 15px; font-weight: 700;
   text-shadow: 0 1px 2px #000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: all 0.2s ease;
 }
-.btn:hover { filter: brightness(1.2); color: #fff; }
+.btn:hover { filter: brightness(1.25); color: #fff; box-shadow: 0 0 12px rgba(240,195,82,0.25); }
 .btn.play {
-  background: linear-gradient(180deg, #c25a1a, #7a3410);
-  border-color: #a04a16; font-size: 19px; padding: 11px 34px;
+  background: linear-gradient(180deg, #8a1f11 0%, #521006 100%);
+  border-color: var(--ember-red); font-size: 19px; padding: 11px 34px;
 }
+.btn.play:hover { border-color: var(--ember-orange); box-shadow: 0 0 20px rgba(248,106,33,0.4); }
 .btn.ghost { background: transparent; border: 1px solid var(--gold-dim); color: var(--gold-hi); }
 .btn:disabled { opacity: 0.5; cursor: default; }
 
@@ -88,10 +102,10 @@ nav.bar a:hover, nav.bar a.active { background: var(--panel2); color: var(--gold
   margin-bottom: 16px;
 }
 .panel > h2, .panel > h3 {
-  background: linear-gradient(180deg, #2a2415, #1c1810);
-  color: var(--gold); font-variant: small-caps; letter-spacing: 2px;
-  padding: 8px 14px; border-bottom: 1px solid var(--line); font-size: 17px;
-  margin: 0;
+  background: linear-gradient(180deg, #241a10, #14100a);
+  color: var(--gold-bright); font-variant: small-caps; letter-spacing: 3px;
+  padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 17px;
+  margin: 0; text-shadow: 0 0 12px rgba(240,195,82,0.25);
 }
 .panel .body { padding: 14px; }
 .panel p { line-height: 1.65; margin-bottom: 10px; color: #c9bd97; }
@@ -100,13 +114,14 @@ nav.bar a:hover, nav.bar a.active { background: var(--panel2); color: var(--gold
 .hero {
   text-align: center; padding: 44px 16px 36px;
   background:
-    radial-gradient(ellipse at 50% 120%, rgba(255,122,26,0.16), transparent 60%),
-    linear-gradient(180deg, #191410, #0e0d0b);
-  border: 1px solid var(--line); border-radius: 4px; margin-bottom: 16px;
+    radial-gradient(ellipse at 50% 120%, rgba(211,56,26,0.22), transparent 60%),
+    linear-gradient(180deg, #141010, #070504);
+  border: 1px solid var(--line); border-radius: 6px; margin-bottom: 16px;
   position: relative; overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 20px rgba(200,149,40,0.06);
 }
-.hero h1 { color: var(--gold); font-size: 40px; letter-spacing: 2px; margin-bottom: 8px;
-  text-shadow: 0 0 26px rgba(255,122,26,0.4), 0 2px 4px #000; font-variant: small-caps; }
+.hero h1 { color: var(--gold-bright); font-size: 40px; letter-spacing: 4px; margin-bottom: 8px;
+  text-shadow: 0 0 26px rgba(248,106,33,0.45), 0 2px 4px #000; font-variant: small-caps; font-weight: 700; }
 .hero .tag { color: var(--parch-dim); font-style: italic; margin-bottom: 20px; }
 
 /* news */
