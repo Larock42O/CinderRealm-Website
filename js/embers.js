@@ -22,7 +22,7 @@
   // Respect users who prefer reduced motion.
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  var COUNT = Math.min(36, Math.max(18, Math.floor(window.innerWidth / 48)));
+  var COUNT = Math.min(80, Math.max(45, Math.floor(window.innerWidth / 24)));
 
   function Ember() { this.reset(true); }
   Ember.prototype.reset = function (initial) {
