@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forums — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/style.css?v=15">
 <style>
 .forum-cat { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); }
 .forum-cat:last-child { border-bottom:none; }
@@ -34,6 +34,9 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
 .crumb { font-size:12px; color:var(--parch-dim); margin-bottom:10px; }
 .crumb a { color:var(--parch-dim); }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">The realm gathers</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
@@ -66,6 +69,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
   <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
 </footer>
 <script src="js/common.js?v=7"></script>
+<script src="js/embers.js?v=1"></script>
 <script>
 /* Forums — UI live now; thread/post storage arrives with the server forum API (next update).
    API contract: GET /api/forums/categories | GET /api/forums/category/:id
