@@ -41,7 +41,7 @@
   <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="hiscores.html">Hiscores</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
   <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
 </footer>
-<script src="js/common.js?v=7"></script>
+<script src="js/common.js?v=8"></script>
 <script src="js/embers.js?v=2"></script>
 <script>
 (function () {
@@ -53,39 +53,13 @@
     gate.style.display = on ? 'none' : '';
     live.style.display = on ? '' : 'none';
     if (on) {
-      results.innerHTML = '<p class="status">Linking to the Tradekeep…</p>';
-      Cinder.linkMarket()
-        .then(() => Cinder.send({ t: 'bourse_open' }))
-        .catch(() => { results.innerHTML = '<p class="status">Market link expired — log in again on the <a href="login.html">login page</a>, then return here.</p>'; });
+      results.innerHTML = '<p class="status">Live market data arrives with the next server update — check back soon.</p>';
     }
   }
   new MutationObserver(refresh).observe(document.querySelector('[data-profile]'), { childList: true, subtree: true });
   refresh();
-  document.addEventListener('bourse', (ev) => {
-    const m = ev.detail;
-    if (!m || !m.t) return;
-    if (m.t === 'bourse_open' || m.t === 'bourse_results' || m.t === 'bourse_search_results') {
-      const rows = m.results || m.items || m.offers || [];
-      if (!rows.length) { results.innerHTML = '<p class="status">No offers found.</p>'; return; }
-      results.innerHTML = rows.map((r) => {
-        const name = Cinder.esc(r.name || r.item || 'Unknown');
-        const price = r.price != null ? Number(r.price).toLocaleString() + ' gp' : '—';
-        const qty = r.qty != null ? ' ×' + r.qty : '';
-        const side = r.side ? ' <span class="status">[' + Cinder.esc(r.side) + ']</span>' : '';
-        return '<div class="trade"><span>' + name + side + '<span class="status">' + qty + '</span></span><span class="price">' + price + '</span></div>';
-      }).join('');
-    } else if (m.t === 'bourse_price') {
-      results.innerHTML = '<div class="trade"><span>' + Cinder.esc(m.item || m.name || '') + '</span><span class="price">' +
-        (m.price != null ? Number(m.price).toLocaleString() + ' gp' : 'no recent trades') + '</span></div>';
-    } else if (m.t === 'bourse_err' || m.msg) {
-      results.innerHTML = '<p class="status">' + Cinder.esc(m.msg || 'Market query failed.') + '</p>';
-    }
-  });
   function search() {
-    const q = document.getElementById('tk-q').value.trim();
-    if (!q) return;
-    results.innerHTML = '<p class="status">Consulting the ledgers…</p>';
-    Cinder.send({ t: 'bourse_search', q });
+    results.innerHTML = '<p class="status">Live market data arrives with the next server update — check back soon.</p>';
   }
   document.getElementById('tk-search').addEventListener('click', search);
   document.getElementById('tk-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
