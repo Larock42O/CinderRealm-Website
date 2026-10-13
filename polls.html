@@ -23,7 +23,7 @@
   <div class="panel">
     <h2>Realm Polls</h2>
     <div class="body">
-      <p>The community steers the Forge. Vote in open polls — results are tallied live and the winning choice guides development.</p>
+      <p>The community steers the Forge. Vote in open polls — the winning choice guides development. Realm-wide tallies go live with the next server update.</p>
       <div id="polls"></div>
     </div>
   </div>
@@ -75,7 +75,7 @@
   function resultBars(p, mine) {
     const s = serverPoll(p.id);
     if (!s || !s.tallies) {
-      return '<p class="status" style="margin-top:8px">Your vote is in. Realm-wide tallies go live with Tuesday\u2019s update — then you\u2019ll see every voter\u2019s choice here.</p>';
+      return '<p class="status" style="margin-top:8px">Your vote is in. Realm-wide tallies go live with the next server update — then you\u2019ll see every voter\u2019s choice here.</p>';
     }
     const total = s.tallies.reduce((a, b) => a + b, 0) || 1;
     const rows = p.opts.map((o, i) => {
