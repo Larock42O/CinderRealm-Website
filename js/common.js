@@ -5,7 +5,8 @@
  * game client, where you log in again, fresh.
  * The website session is just your name, kept per-tab. Live game data
  * (market, levels) comes via HTTP APIs (Tuesday); until then Tradekeep
- * can link on demand right after you log in. */
+ * shows a coming-soon notice — the old on-demand WS link sent hello
+ * (world join) and is disabled. */
 (function () {
   const WS_URL = 'wss://cinderrealm.onrender.com/ws-game';
   const S = { ws: null, authed: false, name: null, token: null, tokenAt: 0, waiters: {} };
@@ -72,25 +73,11 @@
   function rankLabel() { return isOwner() ? 'Owner' : '—'; }
   function crown() { return isOwner() ? '&#128081; ' : ''; }
 
-  // Tradekeep stopgap: link a live market feed on demand. Needs a fresh
-  // token (right after login); Tuesday's HTTP market API replaces this.
+  // Tradekeep stopgap DISABLED: the old version opened a WebSocket and sent
+  // hello (world join) to get market data — the website must never hello.
+  // Live market data comes from Tuesday's HTTP market API instead.
   async function linkMarket() {
-    if (!S.authed) throw new Error('not logged in');
-    if (!S.token || Date.now() - S.tokenAt > 4 * 60 * 1000) throw new Error('session expired');
-    const ws = new WebSocket(WS_URL);
-    S.ws = ws;
-    await new Promise((resolve, reject) => {
-      const to = setTimeout(() => reject(new Error('connect timeout')), 20000);
-      ws.onopen = () => { clearTimeout(to); ws.send(JSON.stringify({ t: 'hello', token: S.token })); resolve(); };
-      ws.onerror = () => { clearTimeout(to); reject(new Error('connection failed')); };
-    });
-    ws.onclose = () => { if (S.ws === ws) S.ws = null; };
-    ws.onmessage = (ev) => {
-      let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-      if (m.t && m.t.indexOf('bourse') === 0) {
-        document.dispatchEvent(new CustomEvent('bourse', { detail: m }));
-      }
-    };
+    throw new Error('market API not ready');
   }
 
   function renderProfile() {
