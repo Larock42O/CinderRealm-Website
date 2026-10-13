@@ -24,6 +24,19 @@
     <h2>Hiscores</h2>
     <div class="body">
       <div class="notice" id="hiscores-note">High scores aren't tracked by the game yet — live rankings go up with the next server update. Check back soon.</div>
+      <div id="hiscores-picker" style="display:none;margin:10px 0">
+        <label class="status" for="hiscores-skill">Discipline: </label>
+        <select id="hiscores-skill">
+          <option value="total">Total</option>
+          <option>Precision</option><option>Might</option><option>Resilience</option>
+          <option>Marksmanship</option><option>Arcana</option><option>Devotion</option>
+          <option>Vitality</option><option>Excavation</option><option>Angling</option>
+          <option>Logging</option><option>Culinary</option><option>Pyrecraft</option>
+          <option>Metallurgy</option><option>Slayer</option><option>Herblore</option>
+          <option>Thieving</option><option>Artisan</option><option>Fletching</option>
+          <option>Agility</option><option>Essencecraft</option>
+        </select>
+      </div>
       <table class="scores" id="hiscores-table" style="display:none">
         <thead><tr><th>Rank</th><th>Hero</th><th>Discipline</th><th>Level</th><th>Experience</th></tr></thead>
         <tbody></tbody>
@@ -52,8 +65,10 @@
         '</td><td>' + x.level + '</td><td>' + Number(x.xp).toLocaleString() + '</td></tr>').join('');
       document.getElementById('hiscores-table').style.display = '';
       document.getElementById('hiscores-note').style.display = 'none';
+      document.getElementById('hiscores-picker').style.display = '';
     } catch (e) { /* API not live yet */ }
   }
+  document.getElementById('hiscores-skill').addEventListener('change', (e) => load(e.target.value));
   load('total');
 })();
 </script>
