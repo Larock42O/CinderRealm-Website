@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Settings — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css?v=17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">Your account, your rules</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
+<div class="masthead">
+  <a class="logoimg" href="index.html"><img src="img/logo.png?v=6" alt="Cinderrealm — World of Dunmere"></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel">
+    <h2>Account Settings</h2>
+    <div class="body">
+      <div id="settings-locked" class="notice" style="display:none">Sign in to manage your account. <a href="login.html">Log in</a></div>
+      <div id="settings-pending" class="notice" style="display:none">Account settings arrive with the next server update — password changes, recovery email, messages, and standing will live here.</div>
+      <div id="settings-unlock" style="display:none;margin-bottom:14px">
+        <p class="status">Enter your password to unlock account settings.</p>
+        <div class="searchrow" style="max-width:420px">
+          <input id="settings-pass" type="password" placeholder="Password" autocomplete="current-password">
+          <button class="btn" id="settings-unlock-btn" style="padding:7px 18px;font-size:14px">Unlock</button>
+        </div>
+        <p class="status" id="settings-unlock-msg"></p>
+      </div>
+      <div id="settings-sections" style="display:none">
+        <h3 style="color:var(--gold-hi);font-variant:small-caps;margin:6px 0 8px">Change password</h3>
+        <div style="max-width:420px">
+          <input id="pw-current" type="password" placeholder="Current password" autocomplete="current-password" style="width:100%;background:#0c0b09;border:1px solid var(--line);color:var(--parch);padding:8px 10px;border-radius:3px;font-family:inherit;margin-bottom:8px">
+          <input id="pw-new" type="password" placeholder="New password (8+ characters)" autocomplete="new-password" style="width:100%;background:#0c0b09;border:1px solid var(--line);color:var(--parch);padding:8px 10px;border-radius:3px;font-family:inherit;margin-bottom:8px">
+          <input id="pw-confirm" type="password" placeholder="Confirm new password" autocomplete="new-password" style="width:100%;background:#0c0b09;border:1px solid var(--line);color:var(--parch);padding:8px 10px;border-radius:3px;font-family:inherit;margin-bottom:8px">
+          <button class="btn" id="pw-save" style="padding:7px 18px;font-size:14px">Change password</button>
+          <p class="status" id="pw-msg"></p>
+        </div>
+        <h3 style="color:var(--gold-hi);font-variant:small-caps;margin:18px 0 8px">Recovery email</h3>
+        <p class="status">Your email is only used for password recovery. <span id="email-current">No email on file yet.</span></p>
+        <div class="searchrow" style="max-width:420px">
+          <input id="email-input" type="email" placeholder="you@example.com" autocomplete="email">
+          <button class="btn" id="email-save" style="padding:7px 18px;font-size:14px">Save email</button>
+        </div>
+        <p class="status" id="email-msg"></p>
+        <h3 style="color:var(--gold-hi);font-variant:small-caps;margin:18px 0 8px">Messages</h3>
+        <div id="messages-list"><p class="status">No messages.</p></div>
+        <h3 style="color:var(--gold-hi);font-variant:small-caps;margin:18px 0 8px">Account standing</h3>
+        <div id="standing-box"><p class="status">Good standing — no infractions.</p></div>
+        <p class="status">If you ever receive an infraction, it appears here with the date it occurred.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js?v=9"></script>
+<script src="js/embers.js?v=2"></script>
+<script>
+// Account Settings — calls the /api/web/* endpoints. Until the server ships
+// them, every call 404s and the page says so honestly instead of pretending.
+(function () {
+  const API = 'https://cinderrealm.onrender.com';
+  const $ = (id) => document.getElementById(id);
+  let webToken = null;
+  try { webToken = sessionStorage.getItem('cinder_web_token'); } catch (e) {}
+  function show(id, on) { $(id).style.display = on ? '' : 'none'; }
+  async function call(path, opts) {
+    const r = await fetch(API + path, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(webToken ? { Authorization: 'Bearer ' + webToken } : {}), ...(opts && opts.headers ? opts.headers : {}) },
+    });
+    if (r.status === 404) throw Object.assign(new Error('not-live'), { code: 'not-live' });
+    let body = null; try { body = await r.json(); } catch (e) {}
+    if (!r.ok) throw Object.assign(new Error((body && body.error) || ('Request failed (' + r.status + ')')), { code: r.status });
+    return body;
+  }
+  function pending() {
+    show('settings-unlock', false); show('settings-sections', false); show('settings-pending', true);
+  }
+  async function loadSections() {
+    try {
+      const profile = await call('/api/web/profile');
+      $('email-current').textContent = profile.email ? ('On file: ' + profile.email) : 'No email on file yet.';
+      if (profile.email) $('email-input').value = profile.email;
+      const msgs = await call('/api/web/messages');
+      const list = (msgs && msgs.messages) || [];
+      $('messages-list').innerHTML = list.length ? list.map((m) =>
+        '<div style="border:1px solid var(--line);border-radius:4px;padding:10px;margin-bottom:8px"><b style="color:var(--gold-hi);font-variant:small-caps">' + Cinder.esc(m.kind || 'info') + '</b> ' +
+        '<span class="status">' + Cinder.esc(new Date(m.at).toLocaleDateString()) + '</span><p style="margin:6px 0 0">' + Cinder.esc(m.text || '') + '</p></div>').join('')
+        : '<p class="status">No messages.</p>';
+      const st = await call('/api/web/standing');
+      const infr = (st && st.infractions) || [];
+      if (st && st.standing && st.standing !== 'good') {
+        $('standing-box').innerHTML = '<p><b style="color:#ff9a9a">Account ' + Cinder.esc(st.standing) + '</b></p>';
+      } else {
+        $('standing-box').innerHTML = '<p class="status">Good standing — no infractions.</p>';
+      }
+      if (infr.length) {
+        $('standing-box').innerHTML += '<ul class="rules">' + infr.map((i) =>
+          '<li><b>' + Cinder.esc(i.reason || 'Infraction') + '</b> — ' + Cinder.esc(new Date(i.at).toLocaleDateString()) + '</li>').join('') + '</ul>';
+      }
+      show('settings-sections', true);
+    } catch (e) {
+      if (e.code === 'not-live') { pending(); return; }
+      if (e.code === 401) { webToken = null; try { sessionStorage.removeItem('cinder_web_token'); } catch (e2) {} show('settings-unlock', true); show('settings-sections', false); return; }
+      pending();
+    }
+  }
+  async function unlock() {
+    const pass = $('settings-pass').value;
+    if (!pass) { $('settings-unlock-msg').textContent = 'Enter your password.'; return; }
+    $('settings-unlock-msg').textContent = 'Unlocking…';
+    try {
+      const res = await call('/api/web/login', { method: 'POST', body: JSON.stringify({ name: Cinder.name, password: pass }) });
+      webToken = res.token;
+      try { sessionStorage.setItem('cinder_web_token', webToken); } catch (e) {}
+      show('settings-unlock', false);
+      await loadSections();
+    } catch (e) {
+      if (e.code === 'not-live') { pending(); return; }
+      $('settings-unlock-msg').textContent = e.code === 401 ? 'Wrong password.' : 'Could not unlock settings — try again in a moment.';
+    }
+  }
+  async function changePassword() {
+    const cur = $('pw-current').value, nw = $('pw-new').value, cf = $('pw-confirm').value;
+    if (!cur || !nw) { $('pw-msg').textContent = 'Fill in all three fields.'; return; }
+    if (nw.length < 8) { $('pw-msg').textContent = 'New password must be at least 8 characters.'; return; }
+    if (nw !== cf) { $('pw-msg').textContent = 'New passwords do not match.'; return; }
+    $('pw-msg').textContent = 'Changing…';
+    try {
+      await call('/api/web/password', { method: 'POST', body: JSON.stringify({ currentPassword: cur, newPassword: nw }) });
+      $('pw-msg').textContent = 'Password changed.';
+      $('pw-current').value = ''; $('pw-new').value = ''; $('pw-confirm').value = '';
+    } catch (e) { $('pw-msg').textContent = e.code === 'not-live' ? 'Password changes arrive with the next server update.' : e.message; }
+  }
+  async function saveEmail() {
+    const email = $('email-input').value.trim();
+    if (!email || email.indexOf('@') < 1) { $('email-msg').textContent = 'Enter a valid email address.'; return; }
+    $('email-msg').textContent = 'Saving…';
+    try {
+      await call('/api/web/email', { method: 'POST', body: JSON.stringify({ email }) });
+      $('email-msg').textContent = 'Email saved.';
+      $('email-current').textContent = 'On file: ' + email;
+    } catch (e) { $('email-msg').textContent = e.code === 'not-live' ? 'Recovery email arrives with the next server update.' : e.message; }
+  }
+  $('settings-unlock-btn').addEventListener('click', unlock);
+  $('settings-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+  $('pw-save').addEventListener('click', changePassword);
+  $('email-save').addEventListener('click', saveEmail);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.Cinder || !Cinder.authed) { show('settings-locked', true); return; }
+    if (webToken) { loadSections(); } else { show('settings-unlock', true); }
+  });
+})();
+</script>
+</body>
+</html>
