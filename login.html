@@ -610,6 +610,7 @@
         <button type="submit" class="submit-btn" id="submit-btn">
           ENTER REALM
         </button>
+        <p id="back-home" style="display:none;text-align:center;margin-top:14px"><a href="index.html" style="color:var(--gold-mid);font-size:0.85rem;letter-spacing:1px">← BACK TO THE MAIN PAGE</a></p>
       </form>
     </div>
   </main>
@@ -776,6 +777,7 @@
       usernameEl.value = Cinder.name;
       showOk('Welcome back, ' + Cinder.name + '.');
       submitBtn.textContent = 'PLAY NOW';
+      document.getElementById('back-home').style.display = '';
     }
 
     authForm.addEventListener('submit', async (ev) => {
@@ -814,6 +816,7 @@
           ? 'Account forged. Welcome to Dunmere, ' + name + '.'
           : 'Welcome back, ' + name + '.');
         submitBtn.textContent = 'PLAY NOW';
+        document.getElementById('back-home').style.display = '';
       } else {
         showError(r.msg || 'Could not verify those credentials.');
         submitBtn.textContent = authMode === 'register' ? 'FORGE ACCOUNT' : 'ENTER REALM';
