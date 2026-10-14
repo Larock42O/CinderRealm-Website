@@ -107,6 +107,7 @@
             <p>The continent's shores have been redrawn from the original reference map — bays, inlets, and peninsulas all around, with Saltmere Isle offshore. Bigger lands are coming next.</p>
           </div>
         </div>
+        <div id="news-pages"></div>
       </div>
 
       <div class="panel">
@@ -180,6 +181,41 @@
   fetch('https://cinderrealm.onrender.com/', { mode: 'no-cors', signal: ctrl.signal })
     .then(() => { clearTimeout(warnTimer); clearTimeout(killTimer); up(); })
     .catch(() => { clearTimeout(warnTimer); clearTimeout(killTimer); down(); });
+})();
+// News & Updates pagination: 4 updates per page, pages grow automatically
+// as more .newsitem entries are added. Only the updates list paginates.
+(function () {
+  const items = Array.from(document.querySelectorAll('.newsitem'));
+  const PER = 4;
+  const pages = Math.ceil(items.length / PER);
+  if (pages <= 1) return;
+  const box = document.getElementById('news-pages');
+  if (!box) return;
+  box.style.cssText = 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px';
+  let cur = 1;
+  function paint(btn, active, disabled) {
+    btn.style.cssText = 'background:' + (active ? '#3a2c10' : '#17130e') + ';border:1px solid ' + (active ? 'var(--gold-hi)' : 'var(--gold-dim)') + ';color:var(--gold-hi);padding:5px 12px;border-radius:3px;cursor:' + (disabled ? 'default' : 'pointer') + ';font-family:inherit;font-size:0.85rem;letter-spacing:1px;opacity:' + (disabled ? '0.5' : '1');
+  }
+  function show(p, scroll) {
+    cur = Math.max(1, Math.min(pages, p));
+    items.forEach((it, i) => { it.style.display = (Math.floor(i / PER) + 1 === cur) ? '' : 'none'; });
+    box.innerHTML = '';
+    const mk = (label, target, disabled, active) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = label;
+      paint(b, active, disabled);
+      if (!disabled) b.addEventListener('click', () => { show(target, true); });
+      box.appendChild(b);
+    };
+    mk('← Prev', cur - 1, cur === 1, false);
+    for (let p = 1; p <= pages; p++) mk(String(p), p, false, p === cur);
+    mk('Next →', cur + 1, cur === pages, false);
+    if (scroll) {
+      const panel = box.closest('.panel');
+      if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+  show(1, false);
 })();
 </script>
 </body>
