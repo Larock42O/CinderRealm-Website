@@ -24,10 +24,8 @@
     <h2>The Tradekeep</h2>
     <div class="body">
       <p>No king mints Dunmere's prices — its people do. The Tradekeep is a fully player-driven order-book marketplace run by clerks and bankers in Ironspire City and Sunfall. Post buy offers, list your wares, and watch the realm's economy breathe.</p>
-      <div id="tk-gate">
-        <div class="notice">Log in with your game account above to query the live ledgers.</div>
-      </div>
-      <div id="tk-live" style="display:none">
+      <p class="status">Live market data — no login needed. Prices shown are the guide price, the same number the game shows players.</p>
+      <div id="tk-live">
         <div class="searchrow">
           <input type="text" id="tk-q" placeholder="Search the ledgers… (e.g. rune sword)">
           <button class="btn" id="tk-search">Search</button>
@@ -44,25 +42,62 @@
 <script src="js/common.js?v=8"></script>
 <script src="js/embers.js?v=2"></script>
 <script>
+// Live Tradekeep wiring: public read-only market API, no login needed.
+// GET /api/bourse/search?q=... -> {q, items: [{item, name, guide, market, store, asks, bids, forSale, bestAsk, bestBid}]}
+// GET /api/bourse/price?item=... -> one item + order book + volume. Displayed price is `guide`.
 (function () {
-  const gate = document.getElementById('tk-gate');
-  const live = document.getElementById('tk-live');
   const results = document.getElementById('tk-results');
-  function refresh() {
-    const on = Cinder.authed;
-    gate.style.display = on ? 'none' : '';
-    live.style.display = on ? '' : 'none';
-    if (on) {
-      results.innerHTML = '<p class="status">Live market data arrives with the next server update — check back soon.</p>';
+  const qInput = document.getElementById('tk-q');
+  const API = 'https://cinderrealm.onrender.com/api/bourse';
+  function coins(n) { return n == null ? '—' : Number(n).toLocaleString() + ' gp'; }
+  function bookSide(levels) {
+    if (!levels || !levels.length) return '<span class="status">none</span>';
+    return levels.map(function (lv) { return coins(lv[0]) + ' × ' + Number(lv[1]).toLocaleString(); }).join('<br>');
+  }
+  async function search() {
+    const q = qInput.value.trim();
+    if (q.length < 2) { results.innerHTML = '<p class="status">Type at least 2 characters to search.</p>'; return; }
+    results.innerHTML = '<p class="status">Searching the ledgers…</p>';
+    try {
+      const r = await fetch(API + '/search?q=' + encodeURIComponent(q));
+      if (!r.ok) throw new Error('search failed: ' + r.status);
+      const data = await r.json();
+      const items = data.items || [];
+      if (!items.length) { results.innerHTML = '<p class="status">No matching items on the ledgers.</p>'; return; }
+      results.innerHTML = '<table class="scores"><thead><tr><th>Item</th><th>Guide price</th><th>Buy now</th><th>Sell now</th><th>For sale</th></tr></thead><tbody>' +
+        items.map(function (it) {
+          return '<tr class="tk-row" style="cursor:pointer" data-item="' + it.item + '"><td>' + Cinder.esc(it.name) + '</td><td>' + coins(it.guide) + '</td><td>' + coins(it.bestAsk) + '</td><td>' + coins(it.bestBid) + '</td><td>' + Number(it.forSale || 0).toLocaleString() + '</td></tr>';
+        }).join('') + '</tbody></table><p class="status">Click an item for the full ledger.</p>';
+      results.querySelectorAll('.tk-row').forEach(function (row) {
+        row.addEventListener('click', function () { detail(row.getAttribute('data-item')); });
+      });
+    } catch (e) {
+      results.innerHTML = '<p class="status">Could not reach the market — the server update is still deploying. Try again shortly.</p>';
     }
   }
-  new MutationObserver(refresh).observe(document.querySelector('[data-profile]'), { childList: true, subtree: true });
-  refresh();
-  function search() {
-    results.innerHTML = '<p class="status">Live market data arrives with the next server update — check back soon.</p>';
+  async function detail(id) {
+    results.innerHTML = '<p class="status">Opening the ledger…</p>';
+    try {
+      const r = await fetch(API + '/price?item=' + encodeURIComponent(id));
+      if (r.status === 404) { results.innerHTML = '<p class="status">That item is not traded.</p>'; return; }
+      if (!r.ok) throw new Error('price failed: ' + r.status);
+      const it = await r.json();
+      const vol = it.volume || {};
+      const day = vol.day || {}, week = vol.week || {};
+      results.innerHTML =
+        '<h3>' + Cinder.esc(it.name) + '</h3>' +
+        '<p>Guide price: <strong>' + coins(it.guide) + '</strong> &nbsp; Market (last 20 trades): ' + coins(it.market) + ' &nbsp; Shop: ' + coins(it.store) + '</p>' +
+        '<p>Buy now: ' + coins(it.bestAsk) + ' &nbsp; Sell now: ' + coins(it.bestBid) + ' &nbsp; For sale: ' + Number(it.forSale || 0).toLocaleString() + ' units</p>' +
+        '<p>Traded today: ' + Number(day.trades || 0) + ' trades / ' + Number(day.units || 0) + ' units &nbsp; This week: ' + Number(week.trades || 0) + ' trades / ' + Number(week.units || 0) + ' units</p>' +
+        '<table class="scores"><thead><tr><th>Sell offers (asks)</th><th>Buy offers (bids)</th></tr></thead><tbody><tr><td>' + bookSide(it.asks) + '</td><td>' + bookSide(it.bids) + '</td></tr></tbody></table>' +
+        '<p><a href="#" id="tk-back">← Back to results</a></p>';
+      document.getElementById('tk-back').addEventListener('click', function (e) { e.preventDefault(); search(); });
+    } catch (e) {
+      results.innerHTML = '<p class="status">Could not reach the market — the server update is still deploying. Try again shortly.</p>';
+    }
   }
   document.getElementById('tk-search').addEventListener('click', search);
-  document.getElementById('tk-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+  qInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
 })();
 </script>
 </body>
