@@ -37,6 +37,17 @@
           <option>Agility</option><option>Essencecraft</option>
         </select>
       </div>
+      <div id="hiscores-search" style="display:none;margin:10px 0">
+        <label class="status" for="hiscores-name">Search username: </label>
+        <input id="hiscores-name" type="text" placeholder="Hero name…" autocomplete="off" style="background:#0c0b09;border:1px solid var(--line);color:var(--parch);padding:5px 8px;border-radius:3px;font-family:inherit;font-size:13px;width:170px">
+        <button class="btn" id="hiscores-search-btn" style="padding:5px 14px;font-size:13px">Search</button>
+      </div>
+      <div id="hiscores-search-note" class="notice" style="display:none"></div>
+      <button class="btn ghost" id="hiscores-back" style="display:none;margin-bottom:10px;padding:5px 14px;font-size:13px">← Back to board</button>
+      <table class="scores" id="hiscores-results" style="display:none">
+        <thead><tr><th>Hero</th><th>Discipline</th><th>Rank</th><th>Level</th><th>Experience</th></tr></thead>
+        <tbody></tbody>
+      </table>
       <table class="scores" id="hiscores-table" style="display:none">
         <thead><tr><th>Rank</th><th>Hero</th><th>Level</th><th>Experience</th></tr></thead>
         <tbody></tbody>
@@ -54,11 +65,21 @@
 // Wired for the future high-scores API: GET https://cinderrealm.onrender.com/api/hiscores?skill=<skill>
 // Expected: [{rank, name, skill, level, xp}, ...]
 (function () {
+  const SKILLS = ['total', 'Precision', 'Might', 'Resilience', 'Marksmanship', 'Arcana', 'Devotion',
+    'Vitality', 'Excavation', 'Angling', 'Logging', 'Culinary', 'Pyrecraft', 'Metallurgy', 'Slayer',
+    'Herblore', 'Thieving', 'Artisan', 'Fletching', 'Agility', 'Essencecraft'];
+  const boardCache = {};
+  async function board(skill) {
+    if (!boardCache[skill]) {
+      const r = await fetch('https://cinderrealm.onrender.com/api/hiscores?skill=' + encodeURIComponent(skill));
+      if (!r.ok) throw 0;
+      boardCache[skill] = await r.json();
+    }
+    return boardCache[skill];
+  }
   async function load(skill) {
     try {
-      const r = await fetch('https://cinderrealm.onrender.com/api/hiscores?skill=' + encodeURIComponent(skill || 'total'));
-      if (!r.ok) throw 0;
-      const rows = await r.json();
+      const rows = await board(skill || 'total');
       const tb = document.querySelector('#hiscores-table tbody');
       tb.innerHTML = rows.map((x) =>
         '<tr><td>' + x.rank + '</td><td>' + Cinder.esc(x.name) + '</td>' +
@@ -66,9 +87,54 @@
       document.getElementById('hiscores-table').style.display = '';
       document.getElementById('hiscores-note').style.display = 'none';
       document.getElementById('hiscores-picker').style.display = '';
+      document.getElementById('hiscores-search').style.display = '';
+      document.getElementById('hiscores-search-note').style.display = 'none';
+      document.getElementById('hiscores-results').style.display = 'none';
+      document.getElementById('hiscores-back').style.display = 'none';
     } catch (e) { /* API not live yet */ }
   }
+  async function search() {
+    const q = document.getElementById('hiscores-name').value.trim();
+    if (!q) return;
+    const note = document.getElementById('hiscores-search-note');
+    note.style.display = ''; note.textContent = 'Searching…';
+    document.getElementById('hiscores-table').style.display = 'none';
+    document.getElementById('hiscores-results').style.display = 'none';
+    try {
+      const boards = await Promise.all(SKILLS.map((s) => board(s).then((rows) => ({ skill: s, rows }))));
+      const ql = q.toLowerCase();
+      let hits = [];
+      boards.forEach(({ skill, rows }) => rows.forEach((x) => { if (x.name.toLowerCase() === ql) hits.push({ ...x, board: skill }); }));
+      const exact = hits.length > 0;
+      if (!exact) {
+        boards.forEach(({ skill, rows }) => rows.forEach((x) => { if (x.name.toLowerCase().includes(ql)) hits.push({ ...x, board: skill }); }));
+      }
+      if (!hits.length) {
+        note.textContent = 'No hiscores entry for "' + q + '" — they may be outside the top 100 on every board.';
+        document.getElementById('hiscores-back').style.display = '';
+        return;
+      }
+      const order = (s) => SKILLS.indexOf(s);
+      hits.sort((a, b) => (order(a.board) - order(b.board)) || (a.rank - b.rank));
+      document.querySelector('#hiscores-results tbody').innerHTML = hits.map((x) =>
+        '<tr><td>' + Cinder.esc(x.name) + '</td><td>' + Cinder.esc(x.board === 'total' ? 'Total' : x.board) + '</td>' +
+        '<td>' + x.rank + '</td><td>' + x.level + '</td><td>' + Number(x.xp).toLocaleString() + '</td></tr>').join('');
+      note.textContent = exact ? 'Ranks for "' + q + '" across all boards.' : 'No exact match for "' + q + '" — similar names:';
+      document.getElementById('hiscores-results').style.display = '';
+      document.getElementById('hiscores-back').style.display = '';
+    } catch (e) {
+      note.textContent = 'Could not reach the hiscores — try again in a moment.';
+      document.getElementById('hiscores-back').style.display = '';
+    }
+  }
+  function backToBoard() {
+    document.getElementById('hiscores-name').value = '';
+    load(document.getElementById('hiscores-skill').value);
+  }
   document.getElementById('hiscores-skill').addEventListener('change', (e) => load(e.target.value));
+  document.getElementById('hiscores-search-btn').addEventListener('click', search);
+  document.getElementById('hiscores-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+  document.getElementById('hiscores-back').addEventListener('click', backToBoard);
   load('total');
 })();
 </script>
