@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hiscores — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=15">
+<link rel="stylesheet" href="css/style.css?v=16">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
@@ -38,7 +38,7 @@
         </select>
       </div>
       <table class="scores" id="hiscores-table" style="display:none">
-        <thead><tr><th>Rank</th><th>Hero</th><th>Discipline</th><th>Level</th><th>Experience</th></tr></thead>
+        <thead><tr><th>Rank</th><th>Hero</th><th>Level</th><th>Experience</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -61,8 +61,8 @@
       const rows = await r.json();
       const tb = document.querySelector('#hiscores-table tbody');
       tb.innerHTML = rows.map((x) =>
-        '<tr><td>' + x.rank + '</td><td>' + Cinder.esc(x.name) + '</td><td>' + Cinder.esc(x.skill) +
-        '</td><td>' + x.level + '</td><td>' + Number(x.xp).toLocaleString() + '</td></tr>').join('');
+        '<tr><td>' + x.rank + '</td><td>' + Cinder.esc(x.name) + '</td>' +
+        '<td>' + x.level + '</td><td>' + Number(x.xp).toLocaleString() + '</td></tr>').join('');
       document.getElementById('hiscores-table').style.display = '';
       document.getElementById('hiscores-note').style.display = 'none';
       document.getElementById('hiscores-picker').style.display = '';
