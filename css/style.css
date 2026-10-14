@@ -147,6 +147,17 @@ table.scores { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.scores th, table.scores td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--line); }
 table.scores th { color: var(--gold); font-variant: small-caps; background: #14110b; }
 table.scores tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+/* Keep wide tables inside their panel on small screens: the box stays put,
+   the table scrolls within it instead of widening the whole page. */
+.panel .body { overflow-x: auto; }
+/* Never let the page itself scroll sideways on phones. */
+html, body { overflow-x: hidden; }
+@media (max-width: 640px) {
+  table.scores { font-size: 12px; }
+  table.scores th, table.scores td { padding: 6px 6px; }
+  .wrap { padding: 12px 8px 32px; }
+  .panel .body { padding: 10px 8px; }
+}
 .notice { border: 1px dashed #55503c; padding: 14px; text-align: center; color: var(--parch-dim); font-style: italic; font-size: 13px; }
 
 /* polls */
