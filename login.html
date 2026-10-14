@@ -771,21 +771,25 @@
       if (saved) usernameEl.value = saved;
     } catch (e) {}
 
-    // Already signed in on the site? Offer Play Now straight away.
+    // Already signed in on the site? Head back to the main page — the
+    // website login is website-only; the game client is reached via Play Free Now.
     if (window.Cinder && Cinder.authed && Cinder.name) {
       authedName = Cinder.name;
       usernameEl.value = Cinder.name;
-      showOk('Welcome back, ' + Cinder.name + '.');
-      submitBtn.textContent = 'PLAY NOW';
+      showOk('Welcome back, ' + Cinder.name + '. Taking you back to the main page…');
+      submitBtn.textContent = 'SIGNED IN';
+      submitBtn.classList.add('busy');
       document.getElementById('back-home').style.display = '';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1200);
     }
 
     authForm.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       clearMsgs();
-      // Already verified? Then this button launches the game.
+      // Already verified? Head back to the main page (website login is
+      // website-only; the game client is reached via Play Free Now).
       if (authedName) {
-        window.location.href = GAME_URL;
+        window.location.href = 'index.html';
         return;
       }
       const name = usernameEl.value.trim();
@@ -813,10 +817,12 @@
           else localStorage.removeItem('cinder_site_user');
         } catch (e) {}
         showOk(authMode === 'register'
-          ? 'Account forged. Welcome to Dunmere, ' + name + '.'
-          : 'Welcome back, ' + name + '.');
-        submitBtn.textContent = 'PLAY NOW';
+          ? 'Account forged. Welcome to Dunmere, ' + name + '. Taking you back to the main page…'
+          : 'Welcome back, ' + name + '. Taking you back to the main page…');
+        submitBtn.textContent = 'SIGNED IN';
+        submitBtn.classList.add('busy');
         document.getElementById('back-home').style.display = '';
+        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
       } else {
         showError(r.msg || 'Could not verify those credentials.');
         submitBtn.textContent = authMode === 'register' ? 'FORGE ACCOUNT' : 'ENTER REALM';
