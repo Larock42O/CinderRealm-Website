@@ -760,7 +760,7 @@
       tabLogin.classList.toggle('active', isLogin);
       tabRegister.classList.toggle('active', !isLogin);
       confirmGroup.classList.toggle('show', !isLogin);
-      submitBtn.textContent = authedName ? 'PLAY NOW' : (isLogin ? 'ENTER REALM' : 'FORGE ACCOUNT');
+      submitBtn.textContent = authedName ? 'SIGNED IN' : (isLogin ? 'ENTER REALM' : 'FORGE ACCOUNT');
     }
     tabLogin.addEventListener('click', () => setMode('login'));
     tabRegister.addEventListener('click', () => setMode('register'));
