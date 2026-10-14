@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reset Your Password — Cinderrealm</title>
+<link rel="stylesheet" href="css/style.css?v=17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">Forge a new key</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
+<div class="masthead">
+  <a class="logoimg" href="index.html"><img src="img/logo.png?v=6" alt="Cinderrealm — World of Dunmere"></a>
+  <nav class="bar">
+    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
+    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
+  </nav>
+</div>
+<div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
+<div class="wrap">
+  <div class="panel">
+    <h2>Reset Your Password</h2>
+    <div class="body">
+      <div id="reset-checking" class="notice">Checking your recovery link…</div>
+      <div id="reset-bad" class="notice" style="display:none">This recovery link is invalid, expired, or already used. <a href="forgot-password.html">Request a new one</a>.</div>
+      <div id="reset-form" style="display:none;max-width:420px">
+        <p>Enter a new password for your account.</p>
+        <input id="reset-new" type="password" placeholder="New password (8+ characters)" autocomplete="new-password" style="width:100%;background:#0c0b09;border:1px solid var(--line);color:var(--parch);padding:8px 10px;border-radius:3px;font-family:inherit;margin-bottom:8px">
+        <input id="reset-confirm" type="password" placeholder="Confirm new password" autocomplete="new-password" style="width:100%;background:#0c0b09;border:1px solid var(--line);color:var(--parch);padding:8px 10px;border-radius:3px;font-family:inherit;margin-bottom:8px">
+        <button class="btn" id="reset-save" style="padding:7px 18px;font-size:14px">Reset password</button>
+        <p class="status" id="reset-msg"></p>
+      </div>
+      <div id="reset-done" class="notice" style="display:none">Password changed. <a href="login.html">Log in with your new password</a>.</div>
+      <p><a href="login.html">← Back to login</a></p>
+    </div>
+  </div>
+</div>
+<footer>
+  <div><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></div>
+  <div>Cinderrealm — World of Dunmere. An original fantasy MMORPG.</div>
+</footer>
+<script src="js/common.js?v=9"></script>
+<script src="js/embers.js?v=2"></script>
+<script>
+// Password reset — the token from the recovery link is validated server-side
+// BEFORE the form is shown. The token travels in the POST body, never in a
+// GET, and is stripped from the address bar once read (no referrer leak).
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const API = 'https://cinderrealm.onrender.com';
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token') || '';
+  // Drop the token from the address bar as soon as we've read it.
+  if (token) { try { window.history.replaceState(null, '', window.location.pathname); } catch (e) {} }
+  async function post(path, body) {
+    const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (r.status === 404) throw Object.assign(new Error('not-live'), { code: 'not-live' });
+    let data = null; try { data = await r.json(); } catch (e) {}
+    if (!r.ok) throw Object.assign(new Error((data && data.error) || 'Request failed'), { code: r.status });
+    return data;
+  }
+  async function init() {
+    if (!token) { $('reset-checking').style.display = 'none'; $('reset-bad').style.display = ''; return; }
+    try {
+      const res = await post('/api/web/validate-reset-token', { token });
+      if (!res || !res.valid) throw new Error('invalid');
+      $('reset-checking').style.display = 'none'; $('reset-form').style.display = '';
+    } catch (e) {
+      $('reset-checking').style.display = 'none';
+      // No validate endpoint (Claude's build may not include one): show the
+      // form anyway — the reset call itself validates the token on submit,
+      // and reports honestly if the server update hasn't landed yet.
+      if (e.code === 'not-live') { $('reset-form').style.display = ''; return; }
+      $('reset-bad').style.display = '';
+    }
+  }
+  async function save() {
+    const nw = $('reset-new').value, cf = $('reset-confirm').value;
+    if (!nw) { $('reset-msg').textContent = 'Enter a new password.'; return; }
+    if (nw.length < 8) { $('reset-msg').textContent = 'New password must be at least 8 characters.'; return; }
+    if (nw !== cf) { $('reset-msg').textContent = 'Passwords do not match.'; return; }
+    $('reset-msg').textContent = 'Resetting…';
+    try {
+      await post('/api/web/reset-password', { token, newPassword: nw });
+      $('reset-form').style.display = 'none'; $('reset-done').style.display = '';
+    } catch (e) {
+      $('reset-msg').textContent = e.code === 'not-live'
+        ? 'Password reset arrives with the next server update.'
+        : 'This recovery link is invalid, expired, or already used. Request a new one.';
+    }
+  }
+  $('reset-save').addEventListener('click', save);
+  $('reset-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
+  init();
+})();
+</script>
+</body>
+</html>
