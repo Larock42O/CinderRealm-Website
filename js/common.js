@@ -97,6 +97,7 @@
           '<div class="pmenu" hidden>' +
             '<div class="prow"><span>Status</span><b>On the site</b></div>' +
             '<div class="prow"><span>Donation tier</span><b>' + rankLabel() + '</b></div>' +
+            '<a href="settings.html">Account Settings</a>' +
             '<a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Now</a>' +
             '<button data-act="logout">Log out</button>' +
           '</div>' +
