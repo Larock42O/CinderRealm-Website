@@ -32,6 +32,10 @@ body::after {
   background: radial-gradient(circle at center, transparent 55%, rgba(3,2,2,0.55) 100%);
 }
 .wrap, .topstrip, .masthead, footer { position: relative; z-index: 1; }
+/* The profile dropdown must overlay the masthead below it, not slide under it.
+   .topstrip and .masthead share z-index 1 and the masthead comes later in the DOM,
+   so without this the open menu paints behind the masthead's gold border. */
+.topstrip { z-index: 10; }
 h1, h2, h3, .masthead .logo, .btn {
   font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
 }
