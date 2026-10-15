@@ -143,7 +143,8 @@
       <div class="panel">
         <h3>Hiscores</h3>
         <div class="body">
-          <div class="notice">High scores aren't tracked by the game yet — live rankings go up with the next server update. Check back soon.</div>
+          <div class="notice" id="home-hiscores-note">High scores aren't tracked by the game yet — live rankings go up with the next server update. Check back soon.</div>
+          <div id="home-hiscores-top" style="display:none"></div>
           <p style="margin-top:10px"><a href="hiscores.html">View hiscores →</a></p>
         </div>
       </div>
@@ -236,6 +237,26 @@
     }
   }
   show(1, false);
+})();
+// Home-page hiscores preview: top 5 live from the game API.
+(function () {
+  const note = document.getElementById('home-hiscores-note');
+  const top = document.getElementById('home-hiscores-top');
+  if (!note || !top) return;
+  fetch('https://cinderrealm.onrender.com/api/hiscores?skill=total')
+    .then((r) => { if (!r.ok) throw 0; return r.json(); })
+    .then((rows) => {
+      if (!rows || !rows.length) return;
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      top.innerHTML = '<table style="width:100%;font-size:13px;border-collapse:collapse">' +
+        rows.slice(0, 5).map((x) =>
+          '<tr><td style="padding:3px 6px;color:var(--gold)">' + x.rank + '</td>' +
+          '<td style="padding:3px 6px">' + esc(x.name) + '</td>' +
+          '<td style="padding:3px 6px;text-align:right">' + x.level + '</td></tr>').join('') + '</table>';
+      note.style.display = 'none';
+      top.style.display = '';
+    })
+    .catch(() => { /* API unreachable — keep the placeholder */ });
 })();
 </script>
 </body>
