@@ -12,7 +12,7 @@
   const S = { ws: null, authed: false, name: null, token: null, tokenAt: 0, waiters: {} };
 
   function saveSession() {
-    try { sessionStorage.setItem('cinder_site_session', JSON.stringify({ name: S.name })); } catch (e) {}
+    try { sessionStorage.setItem('cinder_site_session', JSON.stringify({ name: S.name, token: S.token })); } catch (e) {}
   }
   function clearSession() {
     try { sessionStorage.removeItem('cinder_site_session'); } catch (e) {}
@@ -129,7 +129,8 @@
   });
 
   window.Cinder = { login, logout, send, linkMarket,
-    get authed() { return S.authed; }, get name() { return S.name; }, esc };
+    get authed() { return S.authed; }, get name() { return S.name; },
+    get token() { return S.token; }, esc };
 
   // Soft restore: the website remembers who you are (per-tab). No game link.
   (function restore() {
@@ -139,7 +140,7 @@
       try { sessionStorage.removeItem('cinder_session'); } catch (e) {}
       return;
     }
-    S.name = saved.name; S.authed = true;
+    S.name = saved.name; S.token = saved.token || null; S.authed = true;
   })();
   document.addEventListener('DOMContentLoaded', renderProfile);
   renderProfile();

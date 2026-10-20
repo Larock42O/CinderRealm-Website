@@ -183,7 +183,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
   async function post(path, body) {
     // Authed forum posts ride the game WebSocket session once the API is live.
     const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.assign({ token: (window.CinderSession || {}).token }, body)) });
+      body: JSON.stringify(Object.assign({ token: (window.Cinder || {}).token }, body)) });
     if (!r.ok) throw 0;
     return r.json();
   }
