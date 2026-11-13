@@ -39,19 +39,20 @@
 (function () {
   // Poll model. `opened` = ISO date the poll went live. `days` = voting window
   // (default 7 — Jacob extends individual polls by raising this).
-  // Server tallies (GET /api/polls) land Tuesday; until then SERVER = null and
-  // each hero sees their own vote. Shape when live:
+  // Server tallies are live: GET /api/polls fills SERVER, and the server is the
+  // source of truth for tallies and open/closed (local dates are the fallback
+  // if the server can't be reached). Shape:
   //   { polls: [{ id, tallies: [n,n,n], closed: bool, winner: idx|null }] }
   const POLLS = [
     { id: 'p1', q: 'Which region should get the next new quest?',
       opts: ['The Outlands', 'Sunfall Desert', 'The Gloamfen', 'Highcrest Castle'],
-      opened: '2026-10-10', days: 7 },
+      opened: '2026-11-12', days: 7 },
     { id: 'p2', q: 'Where should the third Tradekeep open?',
       opts: ['Whiteguard Keep', 'Thornhollow', 'Mosswick', 'Keep it to two for now'],
-      opened: '2026-10-10', days: 7 },
+      opened: '2026-11-12', days: 7 },
     { id: 'p3', q: 'What should the next weapon special attack be?',
       opts: ['Frostbite Cleave (ice damage + slow)', 'Ember Chain (hits jump between foes)', 'Stoneskin Slam (damage + brief shield)', 'Ashen Veil (brief invisibility)'],
-      opened: '2026-10-10', days: 7 },
+      opened: '2026-11-12', days: 7 },
   ];
   let SERVER = null;
   const DAY = 86400000;
@@ -117,18 +118,52 @@
         // Voted (or closed): reveal the choices.
         body = resultBars(p, mine);
       }
-      return '<div class="poll"><h3>' + Cinder.esc(p.q) + '</h3>' + badge + body + '</div>';
+      const msg = voteMsg[p.id] ? '<p class="status" style="margin-top:6px">' + Cinder.esc(voteMsg[p.id]) + '</p>' : '';
+      return '<div class="poll"><h3>' + Cinder.esc(p.q) + '</h3>' + badge + body + msg + '</div>';
     }).join('');
   }
 
-  document.getElementById('polls').addEventListener('click', (e) => {
+  // Last server verdict per poll (login needed, already voted, ...), shown
+  // under that poll after a vote attempt.
+  const voteMsg = {};
+  document.getElementById('polls').addEventListener('click', async (e) => {
     const b = e.target.closest('[data-vote]'); if (!b) return;
     const id = b.dataset.vote;
     const box = document.getElementById('polls');
     const sel = box.querySelector('input[name="' + id + '"]:checked');
     if (!sel) return;
-    localStorage.setItem('cinder_poll_' + id, sel.closest('label').dataset.opt);
-    // Tuesday: POST /api/polls/vote here (one vote per account, server-enforced).
+    const choice = Number(sel.closest('label').dataset.opt);
+    delete voteMsg[id];
+    b.disabled = true;
+    try {
+      // One vote per account, server-enforced: POST {poll, choice}. Auth the
+      // ways the site already proves who you are — the website session as a
+      // Bearer header (as the Settings page sends it) and the login token in
+      // the body (as the forums send it); the server accepts either.
+      const headers = { 'Content-Type': 'application/json' };
+      let webToken = null;
+      try { webToken = sessionStorage.getItem('cinder_web_token'); } catch (err) {}
+      if (webToken) headers.Authorization = 'Bearer ' + webToken;
+      const r = await fetch('https://cinderrealm.onrender.com/api/polls/vote', {
+        method: 'POST', headers,
+        body: JSON.stringify({ poll: id, choice, token: (window.Cinder || {}).token || undefined }),
+      });
+      const d = await r.json().catch(() => null);
+      if (r.ok && d && d.polls) {
+        localStorage.setItem('cinder_poll_' + id, String(choice));
+        SERVER = d;
+      } else if (r.status === 409 && d) {
+        // Already voted: the answer carries your recorded choice + tallies.
+        if (typeof d.choice === 'number') localStorage.setItem('cinder_poll_' + id, String(d.choice));
+        if (d.polls) SERVER = { polls: d.polls };
+        voteMsg[id] = d.error || 'You have already voted on this poll.';
+      } else {
+        // 401 answers "Log in with your game account to vote." — shown as-is.
+        voteMsg[id] = (d && d.error) || 'Your vote could not be counted. Try again shortly.';
+      }
+    } catch (err) {
+      voteMsg[id] = 'Could not reach the server. Try again shortly.';
+    }
     render();
   });
 
