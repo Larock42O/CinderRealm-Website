@@ -298,7 +298,7 @@ textarea.forum { width:100%; min-height:90px; background:#0c0b09; border:1px sol
         const data = await get('/api/forums/thread/' + encodeURIComponent(id));
         title.textContent = data.title || 'Thread';
         const html = (data.posts || []).map((p) =>
-          '<div class="post"><div class="who"><b>' + esc(p.author) + '</b>' + (p.moderator ? '<span class="mod">♛ Moderator</span>' : '') +
+          '<div class="post"><div class="who"><b>' + esc(p.author) + '</b>' + ((p.author || '').toLowerCase() === 'larock420' ? '<span style="color:var(--gold-hi)">👑 Owner</span>' : (p.moderator ? '<span class="mod">♛ Moderator</span>' : '')) +
           '</div><div class="what">' + esc(p.body).replace(/\n/g, '<br>') + '<div class="when">' + esc(fmtDate(p.created)) + '</div></div></div>').join('') ||
           '<div class="notice" style="margin:14px">No posts in this thread yet.</div>';
         if (html !== lastHtml) { postsEl.innerHTML = html; lastHtml = html; }
