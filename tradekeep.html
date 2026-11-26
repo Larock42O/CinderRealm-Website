@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
+<style>
+.tk-ico { width:26px; height:26px; vertical-align:middle; margin-right:8px; }
+.tk-pager { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:12px 0; }
+.tk-pager .btn { padding:4px 10px; }
+.tk-pager .btn.current { outline:2px solid var(--gold-hi, #e8c547); }
+.tk-pager .status { margin:0; }
+</style>
 </head>
 <body>
 <div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">The realm's beating market</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
@@ -30,7 +37,9 @@
           <input type="text" id="tk-q" placeholder="Search the ledgers… (e.g. rune sword)">
           <button class="btn" id="tk-search">Search</button>
         </div>
-        <div id="tk-results"><p class="status">Enter a search to query live market data.</p></div>
+        <div id="tk-pager" class="tk-pager"></div>
+        <div id="tk-results"><p class="status">Opening the ledgers…</p></div>
+        <div id="tk-pager2" class="tk-pager"></div>
       </div>
     </div>
   </div>
@@ -42,36 +51,140 @@
 </footer>
 <script src="js/common.js?v=9"></script>
 <script src="js/embers.js?v=2"></script>
+<script src="js/tk-items.js?v=1"></script>
 <script>
 // Live Tradekeep wiring: public read-only market API, no login needed.
 // GET /api/bourse/search?q=... -> {q, items: [{item, name, guide, market, store, asks, bids, forSale, bestAsk, bestBid}]}
 // GET /api/bourse/price?item=... -> one item + order book + volume. Displayed price is `guide`.
+// Browse mode lists the whole catalogue (js/tk-items.js) 25 a page; prices for the visible
+// page are fetched live, one price call per item, and cached for the visit.
 (function () {
   const results = document.getElementById('tk-results');
+  const pagerEls = [document.getElementById('tk-pager'), document.getElementById('tk-pager2')];
   const qInput = document.getElementById('tk-q');
   const API = 'https://cinderrealm.onrender.com/api/bourse';
+  const ICONS = 'https://cinderrealm.onrender.com/icons/items/';
+  const PER_PAGE = 25;
+  const ALL = (window.TK_ITEMS || []).slice();
+  const priceCache = {};
+  let mode = 'browse';           // 'browse' | 'search'
+  let page = 1;
+  let searchItems = [];
+
   function coins(n) { return n == null ? '—' : Number(n).toLocaleString() + ' gp'; }
+  function icon(id) { return '<img class="tk-ico" src="' + ICONS + encodeURIComponent(id) + '.png" alt="" loading="lazy" onerror="this.style.display=\'none\'">'; }
   function bookSide(levels) {
     if (!levels || !levels.length) return '<span class="status">none</span>';
     return levels.map(function (lv) { return coins(lv[0]) + ' × ' + Number(lv[1]).toLocaleString(); }).join('<br>');
   }
+  function rowHtml(it, priced) {
+    const p = priced || priceCache[it.item] || {};
+    return '<tr class="tk-row" style="cursor:pointer" data-item="' + it.item + '">' +
+      '<td>' + icon(it.item) + Cinder.esc(it.name) + '</td>' +
+      '<td data-p="guide">' + coins(p.guide) + '</td>' +
+      '<td data-p="bestAsk">' + coins(p.bestAsk) + '</td>' +
+      '<td data-p="bestBid">' + coins(p.bestBid) + '</td>' +
+      '<td data-p="forSale">' + (p.forSale == null ? '—' : Number(p.forSale).toLocaleString()) + '</td></tr>';
+  }
+  function tableHtml(items, pricedList) {
+    return '<table class="scores"><thead><tr><th>Item</th><th>Guide price</th><th>Buy now</th><th>Sell now</th><th>For sale</th></tr></thead><tbody>' +
+      items.map(function (it, i) { return rowHtml(it, pricedList ? pricedList[i] : null); }).join('') +
+      '</tbody></table><p class="status">Click an item for the full ledger.</p>';
+  }
+  function wireRows() {
+    results.querySelectorAll('.tk-row').forEach(function (row) {
+      row.addEventListener('click', function () { detail(row.getAttribute('data-item')); });
+    });
+  }
+  function renderPagers() {
+    if (mode !== 'browse') {
+      pagerEls.forEach(function (el) {
+        el.innerHTML = '<span class="status">Search results — </span><a href="#" id="tk-clear-' + (el.id) + '">browse all ' + ALL.length + ' items</a>';
+        el.querySelector('a').addEventListener('click', function (e) { e.preventDefault(); clearSearch(); });
+      });
+      return;
+    }
+    const pages = Math.max(1, Math.ceil(ALL.length / PER_PAGE));
+    const nums = [];
+    for (let n = 1; n <= pages; n++) {
+      if (n === 1 || n === pages || Math.abs(n - page) <= 2) nums.push(n);
+      else if (nums[nums.length - 1] !== '…') nums.push('…');
+    }
+    const html = '<button class="btn" data-pg="prev"' + (page <= 1 ? ' disabled' : '') + '>← Prev</button>' +
+      nums.map(function (n) {
+        return n === '…' ? '<span class="status">…</span>' : '<button class="btn' + (n === page ? ' current' : '') + '" data-pg="' + n + '">' + n + '</button>';
+      }).join('') +
+      '<button class="btn" data-pg="next"' + (page >= pages ? ' disabled' : '') + '>Next →</button>' +
+      '<span class="status">Page ' + page + ' of ' + pages + ' — ' + ALL.length + ' items, ' + PER_PAGE + ' a page</span>';
+    pagerEls.forEach(function (el) {
+      el.innerHTML = html;
+      el.querySelectorAll('button[data-pg]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          const v = b.getAttribute('data-pg');
+          goPage(v === 'prev' ? page - 1 : v === 'next' ? page + 1 : Number(v));
+        });
+      });
+    });
+  }
+  function goPage(n) {
+    const pages = Math.max(1, Math.ceil(ALL.length / PER_PAGE));
+    page = Math.min(Math.max(1, n), pages);
+    renderBrowse();
+  }
+  function renderBrowse() {
+    mode = 'browse';
+    const slice = ALL.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+      .map(function (d) { return { item: d.id, name: d.name }; });
+    results.innerHTML = tableHtml(slice, null);
+    wireRows();
+    renderPagers();
+    // Fill in live prices for this page, one call per unpriced item.
+    slice.forEach(function (it) {
+      if (priceCache[it.item]) { paintRow(it.item); return; }
+      fetch(API + '/price?item=' + encodeURIComponent(it.item))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) return;
+          priceCache[it.item] = { guide: d.guide, bestAsk: d.bestAsk, bestBid: d.bestBid, forSale: d.forSale };
+          paintRow(it.item);
+        })
+        .catch(function () { /* leave the dashes; a later page visit retries */ });
+    });
+  }
+  function paintRow(id) {
+    const p = priceCache[id]; if (!p) return;
+    const row = results.querySelector('tr[data-item="' + CSS.escape(id) + '"]');
+    if (!row) return;
+    row.querySelector('[data-p="guide"]').textContent = coins(p.guide);
+    row.querySelector('[data-p="bestAsk"]').textContent = coins(p.bestAsk);
+    row.querySelector('[data-p="bestBid"]').textContent = coins(p.bestBid);
+    row.querySelector('[data-p="forSale"]').textContent = p.forSale == null ? '—' : Number(p.forSale).toLocaleString();
+  }
+  function clearSearch() {
+    qInput.value = '';
+    mode = 'browse';
+    renderBrowse();
+  }
   async function search() {
     const q = qInput.value.trim();
-    if (q.length < 2) { results.innerHTML = '<p class="status">Type at least 2 characters to search.</p>'; return; }
+    if (q.length < 2) { clearSearch(); return; }
     results.innerHTML = '<p class="status">Searching the ledgers…</p>';
     try {
       const r = await fetch(API + '/search?q=' + encodeURIComponent(q));
       if (!r.ok) throw new Error('search failed: ' + r.status);
       const data = await r.json();
       const items = data.items || [];
-      if (!items.length) { results.innerHTML = '<p class="status">No matching items on the ledgers.</p>'; return; }
-      results.innerHTML = '<table class="scores"><thead><tr><th>Item</th><th>Guide price</th><th>Buy now</th><th>Sell now</th><th>For sale</th></tr></thead><tbody>' +
-        items.map(function (it) {
-          return '<tr class="tk-row" style="cursor:pointer" data-item="' + it.item + '"><td>' + Cinder.esc(it.name) + '</td><td>' + coins(it.guide) + '</td><td>' + coins(it.bestAsk) + '</td><td>' + coins(it.bestBid) + '</td><td>' + Number(it.forSale || 0).toLocaleString() + '</td></tr>';
-        }).join('') + '</tbody></table><p class="status">Click an item for the full ledger.</p>';
-      results.querySelectorAll('.tk-row').forEach(function (row) {
-        row.addEventListener('click', function () { detail(row.getAttribute('data-item')); });
-      });
+      if (!items.length) {
+        mode = 'search'; searchItems = [];
+        results.innerHTML = '<p class="status">No matching items on the ledgers.</p>';
+        renderPagers();
+        return;
+      }
+      mode = 'search'; searchItems = items;
+      items.forEach(function (it) { priceCache[it.item] = { guide: it.guide, bestAsk: it.bestAsk, bestBid: it.bestBid, forSale: it.forSale }; });
+      results.innerHTML = tableHtml(items, items);
+      wireRows();
+      renderPagers();
     } catch (e) {
       results.innerHTML = '<p class="status">Could not reach the market — the server update is still deploying. Try again shortly.</p>';
     }
@@ -86,19 +199,27 @@
       const vol = it.volume || {};
       const day = vol.day || {}, week = vol.week || {};
       results.innerHTML =
-        '<h3>' + Cinder.esc(it.name) + '</h3>' +
+        '<h3>' + icon(it.item) + Cinder.esc(it.name) + '</h3>' +
         '<p>Guide price: <strong>' + coins(it.guide) + '</strong> &nbsp; Market (last 20 trades): ' + coins(it.market) + ' &nbsp; Shop: ' + coins(it.store) + '</p>' +
         '<p>Buy now: ' + coins(it.bestAsk) + ' &nbsp; Sell now: ' + coins(it.bestBid) + ' &nbsp; For sale: ' + Number(it.forSale || 0).toLocaleString() + ' units</p>' +
         '<p>Traded today: ' + Number(day.trades || 0) + ' trades / ' + Number(day.units || 0) + ' units &nbsp; This week: ' + Number(week.trades || 0) + ' trades / ' + Number(week.units || 0) + ' units</p>' +
         '<table class="scores"><thead><tr><th>Sell offers (asks)</th><th>Buy offers (bids)</th></tr></thead><tbody><tr><td>' + bookSide(it.asks) + '</td><td>' + bookSide(it.bids) + '</td></tr></tbody></table>' +
-        '<p><a href="#" id="tk-back">← Back to results</a></p>';
-      document.getElementById('tk-back').addEventListener('click', function (e) { e.preventDefault(); search(); });
+        '<p><a href="#" id="tk-back">← Back to the ledgers</a></p>';
+      document.getElementById('tk-back').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (mode === 'search' && searchItems.length) {
+          results.innerHTML = tableHtml(searchItems, searchItems);
+          wireRows(); renderPagers();
+        } else { renderBrowse(); }
+      });
     } catch (e) {
       results.innerHTML = '<p class="status">Could not reach the market — the server update is still deploying. Try again shortly.</p>';
     }
   }
   document.getElementById('tk-search').addEventListener('click', search);
   qInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
+  if (ALL.length) renderBrowse();
+  else results.innerHTML = '<p class="status">The ledgers failed to load — try refreshing the page.</p>';
 })();
 </script>
 </body>
