@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cinderrealm — World of Dunmere</title>
-<link rel="stylesheet" href="css/style.css?v=20">
+<link rel="stylesheet" href="css/style.css?v=21">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
@@ -376,38 +376,42 @@
 <script>
 (function(){
   var API = 'https://cinderrealm.onrender.com';
-  var items = [];
   function fmt(n){ return Number(n).toLocaleString('en-US'); }
-  function render(){
+  function j(u){ return fetch(u).then(function(r){ return r.json(); }); }
+  // Build the banner ONCE, after every feed has settled. The old version
+  // re-rendered on each fetch, which restarted the scroll mid-flight and
+  // dropped items (Jacob's phone report, 2026-11-27).
+  var pScores = j(API + '/api/hiscores?skill=total').catch(function(){ return null; });
+  var pTop = j(API + '/api/bourse/top?window=week').then(function(d){
+    if(d && d.totalTrades > 0 && d.items && d.items.length){
+      var t = d.items[0];
+      return '<b>Most sold on the Tradekeep this week:</b> ' + t.name + ' \u2014 ' + fmt(t.units) + ' sold in ' + fmt(t.trades) + ' trades';
+    }
+    return j(API + '/api/bourse/price?item=pyrium_greatsword').then(function(p){
+      return (p && p.guide) ? '<b>Tradekeep\u2019s priciest:</b> Pyrium greatsword \u2014 guide price ' + fmt(p.guide) + ' coins' : null;
+    }).catch(function(){ return null; });
+  }).catch(function(){ return null; });
+  var pActs = j(API + '/api/activity?limit=5').catch(function(){ return null; });
+  Promise.all([pScores, pTop, pActs]).then(function(res){
+    var items = [];
+    var rows = res[0];
+    if(rows && rows.length){
+      items.push('\ud83d\udc51 <b>Highest score:</b> ' + rows[0].name + ' \u2014 ' + fmt(rows[0].level) + ' total level \u00b7 ' + fmt(rows[0].xp) + ' XP');
+      if(rows[1]) items.push('<b>Runner-up:</b> ' + rows[1].name + ' \u2014 ' + fmt(rows[1].level) + ' total level \u00b7 ' + fmt(rows[1].xp) + ' XP');
+    }
+    if(res[1]) items.push(res[1]);
+    var d = res[2];
+    if(d && d.events && d.events.length){
+      d.events.slice(0,3).forEach(function(e){ items.push('<b>Realm feat:</b> ' + e.player + ' ' + e.detail); });
+    } else {
+      items.push('<b>Realm feats:</b> the newest Vesskar kills and Ashfall Arena champions will scroll here');
+    }
+    if(!items.length) return;
     var track = document.getElementById('ticker-track');
-    if(!track || !items.length) return;
+    if(!track) return;
     var html = items.map(function(t){ return '<span>' + t + '</span><span class="gem">\u25c6</span>'; }).join('');
     track.innerHTML = html + html;
-  }
-  function push(t){ items.push(t); render(); }
-  fetch(API + '/api/hiscores?skill=total').then(function(r){ return r.json(); }).then(function(rows){
-    if(rows && rows.length){
-      push('\ud83d\udc51 <b>Highest score:</b> ' + rows[0].name + ' \u2014 ' + fmt(rows[0].level) + ' total level \u00b7 ' + fmt(rows[0].xp) + ' XP');
-      if(rows[1]) push('<b>Runner-up:</b> ' + rows[1].name + ' \u2014 ' + fmt(rows[1].level) + ' total level \u00b7 ' + fmt(rows[1].xp) + ' XP');
-    }
-  }).catch(function(){});
-  fetch(API + '/api/bourse/top?window=week').then(function(r){ return r.json(); }).then(function(d){
-    if(d && d.totalTrades > 0 && d.items && d.items.length){
-      var top = d.items[0];
-      push('<b>Most sold on the Tradekeep this week:</b> ' + top.name + ' \u2014 ' + fmt(top.units) + ' sold in ' + fmt(top.trades) + ' trades');
-    } else {
-      return fetch(API + '/api/bourse/price?item=pyrium_greatsword').then(function(r){ return r.json(); }).then(function(p){
-        if(p && p.guide) push('<b>Tradekeep\u2019s priciest:</b> Pyrium greatsword \u2014 guide price ' + fmt(p.guide) + ' coins');
-      });
-    }
-  }).catch(function(){});
-  fetch(API + '/api/activity?limit=5').then(function(r){ return r.json(); }).then(function(d){
-    if(d && d.events && d.events.length){
-      d.events.slice(0,3).forEach(function(e){ push('<b>Realm feat:</b> ' + e.player + ' ' + e.detail); });
-    } else {
-      push('<b>Realm feats:</b> the newest Vesskar kills and Ashfall Arena champions will scroll here');
-    }
-  }).catch(function(){});
+  });
 })();
 </script>
 <script src="js/nav.js?v=2"></script>

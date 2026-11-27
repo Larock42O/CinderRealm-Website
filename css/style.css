@@ -389,3 +389,19 @@ textarea.forum { min-height: 140px; resize: vertical; }
 .masthead .loginbtn { margin-left: auto; }
 .mast-profile:not(:empty) + .loginbtn { margin-left: 0; }
 @media (max-width: 900px) { .mast-profile { margin-left: 0; } }
+
+/* ---- v21 ticker fixes (Jacob's phone report, 2026-11-27) ----
+   Taps must never pause or jump the banner: it ignores pointer input on
+   touch devices, and hover-pause exists only where a real mouse hovers.
+   The track gets its own compositing layer to stop iOS repaint ghosting. */
+.ticker { pointer-events: none; }
+.ticker-track { backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: translateZ(0); }
+@keyframes tick { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+@media (hover: hover) {
+  .ticker { pointer-events: auto; }
+  .ticker:hover .ticker-track { animation-play-state: paused; }
+}
+@media (max-width: 760px) {
+  .ticker { padding: 10px 0; }
+  .ticker span { font-size: 12px; padding: 0 16px; }
+}
