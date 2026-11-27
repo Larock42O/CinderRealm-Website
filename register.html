@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Account — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=17">
+<link rel="stylesheet" href="css/style.css?v=18">
 <style>
 .authpanel { max-width: 420px; margin: 30px auto; }
 .authpanel .body { padding: 20px; }
@@ -20,11 +20,9 @@
 <body>
 <div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">Your spark awaits</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
 <div class="masthead">
-  <a class="logoimg" href="index.html"><img src="img/logo.png?v=6" alt="Cinderrealm — World of Dunmere"></a>
-  <nav class="bar">
-    <a href="index.html">Home</a><a href="world.html">World</a><a href="hiscores.html">Hiscores</a>
-    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
-  </nav>
+  <a class="logoimg" href="index.html" title="Back to the homepage"><img src="img/logo.png?v=7" alt="Cinderrealm — World of Dunmere"></a>
+  <nav class="bar"><a href="index.html">Home</a><a href="index.html#chronicles">Chronicles</a><a href="world.html">World</a><a href="world.html#endgame">Endgame</a><a href="community.html">Community</a><a href="hiscores.html">Hiscores</a><a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></nav>
+  <a class="btn loginbtn" href="login.html">Login</a>
 </div>
 <div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
 <div class="wrap">
@@ -82,5 +80,6 @@
     document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); }));
 })();
 </script>
+<div class="mobile-play"><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Enter Dunmere — Play Free</a></div>
 </body>
 </html>

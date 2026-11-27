@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cinderrealm — World of Dunmere</title>
-<link rel="stylesheet" href="css/style.css?v=17">
+<link rel="stylesheet" href="css/style.css?v=18">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
@@ -15,16 +15,9 @@
   <span style="display:flex;gap:12px;align-items:center"><span class="online" id="playercount">The Forge burns — join the realm</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span>
 </div>
 <div class="masthead">
-  <a class="logoimg" href="index.html"><img src="img/logo.png?v=6" alt="Cinderrealm — World of Dunmere"></a>
-  <nav class="bar">
-    <a href="index.html" class="active">Home</a>
-    <a href="world.html">World</a>
-    <a href="hiscores.html">Hiscores</a>
-    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a>
-    <a href="polls.html">Polls</a>
-    <a href="donate.html">Donate</a>
-    <a href="rules.html">Rules</a>
-  </nav>
+  <a class="logoimg" href="index.html" title="Back to the homepage"><img src="img/logo.png?v=7" alt="Cinderrealm — World of Dunmere"></a>
+  <nav class="bar"><a href="index.html" class="active">Home</a><a href="index.html#chronicles">Chronicles</a><a href="world.html">World</a><a href="world.html#endgame">Endgame</a><a href="community.html">Community</a><a href="hiscores.html">Hiscores</a><a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></nav>
+  <a class="btn loginbtn" href="login.html">Login</a>
 </div>
 <div class="loginrow">
   <span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span>
@@ -32,39 +25,25 @@
 </div>
 
 <div class="wrap">
-  <div class="hero">
-    <h1>Claim Your Spark</h1>
-    <p class="tag">A dying world. A cooling Forge. One browser. No download — play free right now.</p>
-    <a class="btn play" href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Play Free Now</a>
+  <div class="hero2">
+    <div class="hero-art"><img src="img/logo.png?v=7" alt="Cinderrealm"><div class="scene-caption">Dunmere · A world on the edge of ash</div></div>
+    <div>
+      <div class="eyebrow">A free browser MMORPG • No download required</div>
+      <h1>The forge<br>is <span>fading.</span></h1>
+      <div class="spark">Your spark remains.</div>
+      <p>The fire is going out. The gold, the glory and the monsters are still in there. Go create your legacy.</p>
+      <div class="actions"><a class="btn play" href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Enter Dunmere — Play Free</a><a class="btn ghost" href="world.html">Explore the World</a></div>
+    </div>
   </div>
-
+  <div class="stats"><div class="stat"><strong>33</strong><small>Quests in the realm</small></div><div class="stat"><strong>54</strong><small>Quest points to earn</small></div><div class="stat"><strong>483</strong><small>Items on the Tradekeep</small></div><div class="stat"><strong>Free</strong><small>Play in your browser</small></div></div>
+  <p class="verified-note">Verified game figures only — no invented player counts or live activity.</p>
+  <div class="ticker" aria-label="Realm highlights"><div class="ticker-track" id="ticker-track"><span>👑 <b>Highest score:</b> JennBear — 860 total level · 4,066,230 XP</span><span class="gem">◆</span><span><b>Runner-up:</b> Cx18130 — 819 total level · 2,470,923 XP</span><span class="gem">◆</span><span><b>Tradekeep’s priciest:</b> Pyrium greatsword — guide price 187,226 coins</span><span class="gem">◆</span><span><b>Realm feats:</b> the newest Vesskar kills and Ashfall Arena champions will scroll here</span><span class="gem">◆</span><span>👑 <b>Highest score:</b> JennBear — 860 total level · 4,066,230 XP</span><span class="gem">◆</span><span><b>Runner-up:</b> Cx18130 — 819 total level · 2,470,923 XP</span><span class="gem">◆</span><span><b>Tradekeep’s priciest:</b> Pyrium greatsword — guide price 187,226 coins</span><span class="gem">◆</span><span><b>Realm feats:</b> the newest Vesskar kills and Ashfall Arena champions will scroll here</span><span class="gem">◆</span></div></div>
   <div class="cols">
     <div>
       <div class="panel">
-        <h2>News &amp; Updates</h2>
+        <h2 id="chronicles">The Chronicles</h2>
         <div class="newsitem">
           <div class="thumb num">01</div>
-          <div>
-            <div class="meta"><span class="cat">Game Updates</span> · 27 November 2026</div>
-            <h3><a href="#">Helms, a Wraith, and Brighter Depths</a></h3>
-            <p>A busy night in Dunmere.</p>
-            <p>The two specialty helms are real armour now. The Frostwarden Helm and the Ashen Warden Helm are both in the game as full 3D models, shaped to the head and wearable — no more stand-ins. Jökull, the Glacier Wraith up in Skardholm, also walks in his true form now: ice crown, glowing chest core and all.</p>
-            <p>The dungeons got their light back. Caves and depths used to sit in near-darkness once you zoomed out — now they read at mainland brightness, with just a touch of their old mood left.</p>
-            <p>And a round of fixes from a bug walk through the new land: region names now show the town you're actually standing in, the Great Gate and the salt warehouse door take your clicks properly, both Wending bridges have their railings on the right sides, every fishing spot in the game was checked and sits in water, and the quest journal can now be filtered — Completed, In Progress, Not Started.</p>
-            <p>One more: every quest item in the game can now be destroyed safely. The popup tells you exactly where to claim it back if you ever need it again.</p>
-          </div>
-        </div>
-        <div class="newsitem">
-          <div class="thumb num">02</div>
-          <div>
-            <div class="meta"><span class="cat">Game Updates</span> · 26 November 2026</div>
-            <h3><a href="#">The Southmarch Opens</a></h3>
-            <p>The way south is open. Past Mosswick and the Oasis, the land narrows to one pass — and the Wardens of Sundergate hold it. Finish their quest, "What the Gate Keeps," and the Great Gate swings open for you for good: the Wending river and its bridges, Lake Corrow, the Harrowood, Wadewater Cove, and the dry east arm out to Dunmark Camp and the Dead Beacon. New monsters to fight, fishing spots and gathering all the way down to the far shore.</p>
-            <p>Also in this update: quest items can now be destroyed safely from your pack — the popup tells you where to claim them back if you need them again.</p>
-          </div>
-        </div>
-        <div class="newsitem">
-          <div class="thumb num">03</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 26 November 2026</div>
             <h3><a href="#">New Grounds, Open Water, and Islands With Real Shores</a></h3>
@@ -74,7 +53,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">04</div>
+          <div class="thumb num">02</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 25 November 2026</div>
             <h3><a href="#">The Ashen Depths Are Open</a></h3>
@@ -84,11 +63,11 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">05</div>
+          <div class="thumb num">03</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 25 November 2026</div>
             <h3><a href="#">North to Skardholm, and the Ashen Circle Is Complete</a></h3>
-            <p>The big one. A new quest line, Ash on the Tide, is waiting at Lantern Quay, down by the lighthouse. Finish it and Captain Brenna will sail you north to Skardholm — a snowy island with its own Viking village, shops, monster-haunted wilds and a fishing coast.</p>
+            <p>The big one. A new quest line, Ash on the Tide, is waiting at Lantern Quay, down by the lighthouse. Finish it and Captain Brenna will sail you north to Skardholm — a snowy island with its own Viking village, shops, hunting grounds and fishing coast.</p>
             <p>Skardholm has a quest of its own, The Ember That Would Not Die, and at the end of it waits Jökull, the Glacier Wraith. Beating it gives you a shot at the Northwarden weapons — a rare drop, one weapon per kill at most — and the Frostwarden Helm comes with the quest. You'll want 65 Attack, Strength and Defence, and the quest done, before you can wield them.</p>
             <p>The Ashen Circle in Emberhold is finished too. Duels with coin staking are live, free-for-all battles for four to eight players are in, and the rewards shop is open — tokens buy titles, an ember trail, a weapon wrap and scorched gear.</p>
             <p>You can also form parties of up to five heroes now, with party chat to talk to them. And four lore quests have appeared across Dunmere telling the story of the realm — Archivist Oswin in Highcrest is a good place to start.</p>
@@ -96,7 +75,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">06</div>
+          <div class="thumb num">04</div>
           <div>
             <div class="meta"><span class="cat">Community</span> · 24 November 2026</div>
             <h3><a href="#">We Have a Discord Now</a></h3>
@@ -106,7 +85,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">07</div>
+          <div class="thumb num">05</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 16 November 2026</div>
             <h3><a href="#">New Tiers, New Specials, and a Cleaner Combat Tab</a></h3>
@@ -118,7 +97,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">08</div>
+          <div class="thumb num">06</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 13 November 2026</div>
             <h3><a href="#">Polls Are Back — And They Count This Time</a></h3>
@@ -132,14 +111,14 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">09</div>
+          <div class="thumb num">07</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 12 November 2026</div>
             <h3><a href="#">A Lot More New Stuff</a></h3>
             <p><b>The lag is fixed.</b> The game was dropping people's connections every 30 seconds or so — that's sorted. While we were in there, accounts are now one login at a time: if you're already logged in somewhere, a second login gets told to log out of the first one first.</p>
             <p><b>Highcrest Castle got a lot bigger.</b> The keep grew, there's a full second floor now — kitchen, changing room, a library — and it all connects: up a tower, along the wall walk, across the upstairs, no touching the ground. There's a bank upstairs too, one teller. The courtyard's smaller and the whole place feels like a castle now.</p>
             <p><b>63 new townsfolk.</b> Every town's got people wandering it now, all with names, all with something to say — town tips and rumours if you talk to them.</p>
-            <p><b>Gullrock is open.</b> A whole volcano island out east — Ashwick fishing town, Mount Ashvane, the Kilnborn who live in the rock, and the Crucible: thirty waves and Vesskar at the end, glass shards for every wave you clear.</p>
+            <p><b>Gullrock is open.</b> A whole volcano island out east — Ashwick fishing town, Mount Ashvane, the Kilnborn who live in the rock, and the Crucible: 45 waves, glass shards for every wave you clear, and the Cindermantle waiting at the end of it.</p>
             <p><b>The world has proper light now.</b> Sun and moon on a real day cycle, fog, and a Shadows setting in the options if your phone needs it turned down.</p>
             <p><b>Rennic got his own shop.</b> A proper little magic shop — potions, bookshelves, odd ends. He's still your way into the rune essence mine, and the mine itself got rebuilt: bright shaft, one giant rock to mine, portal on the wall. Bennick runs the Emberhold forge now, two floors, and he'll point you toward Ironspire if you ask about real smithing.</p>
             <p><b>The Smouldering Tankard is open.</b> Social hub in Emberhold — your run energy comes back three times faster inside. There's beer. Fair warning: it hits hard. The wine you can brew yourself.</p>
@@ -150,7 +129,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">10</div>
+          <div class="thumb num">08</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 3 November 2026</div>
             <h3><a href="#">A Lot of New Stuff This Week</a></h3>
@@ -162,7 +141,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">11</div>
+          <div class="thumb num">09</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 19 October 2026</div>
             <h3><a href="#">Guards, a Queen, and Music in the Air</a></h3>
@@ -177,7 +156,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">12</div>
+          <div class="thumb num">10</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 15 October 2026</div>
             <h3><a href="#">String Your Own Bows, Answer the Vanguard's Call</a></h3>
@@ -187,7 +166,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">13</div>
+          <div class="thumb num">11</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 14 October 2026</div>
             <h3><a href="#">The Realm Gets New Faces</a></h3>
@@ -197,7 +176,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">14</div>
+          <div class="thumb num">12</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 13 October 2026</div>
             <h3><a href="#">6 Builds Shipped, 11 Website Fixes Live</a></h3>
@@ -206,7 +185,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">15</div>
+          <div class="thumb num">13</div>
           <div>
             <div class="meta"><span class="cat">Community</span> · 13 October 2026</div>
             <h3><a href="#">Website Polished to Match the Expanded Realm</a></h3>
@@ -214,7 +193,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">16</div>
+          <div class="thumb num">14</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 13 October 2026</div>
             <h3><a href="#">It's Tuesday — The Big Build Is Underway</a></h3>
@@ -222,7 +201,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">17</div>
+          <div class="thumb num">15</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 11 October 2026</div>
             <h3><a href="#">A Proper Login Screen Rises</a></h3>
@@ -230,7 +209,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">18</div>
+          <div class="thumb num">16</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 10 October 2026</div>
             <h3><a href="#">Tuesday Brings a Bigger Dunmere</a></h3>
@@ -238,7 +217,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">19</div>
+          <div class="thumb num">17</div>
           <div>
             <div class="meta"><span class="cat">Community</span> · 10 October 2026</div>
             <h3><a href="#">Official Website Launches</a></h3>
@@ -246,7 +225,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">20</div>
+          <div class="thumb num">18</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 9 October 2026</div>
             <h3><a href="#">Interest Management Goes Live</a></h3>
@@ -254,7 +233,7 @@
           </div>
         </div>
         <div class="newsitem">
-          <div class="thumb num">21</div>
+          <div class="thumb num">19</div>
           <div>
             <div class="meta"><span class="cat">Game Updates</span> · 9 October 2026</div>
             <h3><a href="#">New Coastline Traced</a></h3>
@@ -277,7 +256,7 @@
       <div class="panel">
         <h3>Hiscores</h3>
         <div class="body">
-          <div class="notice" id="home-hiscores-note">High scores aren't tracked by the game yet — live rankings go up with the next server update. Check back soon.</div>
+          <div class="notice" id="home-hiscores-note">Live rankings are warming up — the full board is on the Hiscores page.</div>
           <div id="home-hiscores-top" style="display:none"></div>
           <p style="margin-top:10px"><a href="hiscores.html">View hiscores →</a></p>
         </div>
@@ -305,6 +284,11 @@
       </div>
     </div>
   </div>
+  <div class="panel"><h2>One Realm, Many Roads</h2><div class="body"><div class="roadcards">
+    <div class="roadcard"><h3>Explore Dunmere</h3><p>The atlas of ash and ember, region by region — plus the trials that wait beyond the journey.</p><a class="text-link" href="world.html">Open the World →</a></div>
+    <div class="roadcard"><h3>Prove Yourself</h3><p>The Crucible, the Ashen Depths, the Ashfall Arena and the Tradekeep's live market.</p><a class="text-link" href="world.html#endgame">See the Endgame →</a></div>
+    <div class="roadcard"><h3>Find Your People</h3><p>Discord, the forums, and the keepers of the flame who support the realm.</p><a class="text-link" href="community.html">Meet the Community →</a></div>
+  </div></div></div>
 </div>
 
 <footer>
@@ -395,5 +379,44 @@
     .catch(() => { /* API unreachable — keep the placeholder */ });
 })();
 </script>
+
+<script>
+(function(){
+  var API = 'https://cinderrealm.onrender.com';
+  var items = [];
+  function fmt(n){ return Number(n).toLocaleString('en-US'); }
+  function render(){
+    var track = document.getElementById('ticker-track');
+    if(!track || !items.length) return;
+    var html = items.map(function(t){ return '<span>' + t + '</span><span class="gem">\u25c6</span>'; }).join('');
+    track.innerHTML = html + html;
+  }
+  function push(t){ items.push(t); render(); }
+  fetch(API + '/api/hiscores?skill=total').then(function(r){ return r.json(); }).then(function(rows){
+    if(rows && rows.length){
+      push('\ud83d\udc51 <b>Highest score:</b> ' + rows[0].name + ' \u2014 ' + fmt(rows[0].level) + ' total level \u00b7 ' + fmt(rows[0].xp) + ' XP');
+      if(rows[1]) push('<b>Runner-up:</b> ' + rows[1].name + ' \u2014 ' + fmt(rows[1].level) + ' total level \u00b7 ' + fmt(rows[1].xp) + ' XP');
+    }
+  }).catch(function(){});
+  fetch(API + '/api/bourse/top?window=week').then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.totalTrades > 0 && d.items && d.items.length){
+      var top = d.items[0];
+      push('<b>Most sold on the Tradekeep this week:</b> ' + top.name + ' \u2014 ' + fmt(top.units) + ' sold in ' + fmt(top.trades) + ' trades');
+    } else {
+      return fetch(API + '/api/bourse/price?item=pyrium_greatsword').then(function(r){ return r.json(); }).then(function(p){
+        if(p && p.guide) push('<b>Tradekeep\u2019s priciest:</b> Pyrium greatsword \u2014 guide price ' + fmt(p.guide) + ' coins');
+      });
+    }
+  }).catch(function(){});
+  fetch(API + '/api/activity?limit=5').then(function(r){ return r.json(); }).then(function(d){
+    if(d && d.events && d.events.length){
+      d.events.slice(0,3).forEach(function(e){ push('<b>Realm feat:</b> ' + e.player + ' ' + e.detail); });
+    } else {
+      push('<b>Realm feats:</b> the newest Vesskar kills and Ashfall Arena champions will scroll here');
+    }
+  }).catch(function(){});
+})();
+</script>
+<div class="mobile-play"><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Enter Dunmere — Play Free</a></div>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>World — Cinderrealm</title>
-<link rel="stylesheet" href="css/style.css?v=17">
+<link rel="stylesheet" href="css/style.css?v=18">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
@@ -12,11 +12,9 @@
 <body>
 <div class="topstrip"><span>World of Dunmere</span><span style="display:flex;gap:12px;align-items:center"><span class="online">The Forge burns — join the realm</span><span data-profile style="display:flex;gap:6px;align-items:center"></span></span></div>
 <div class="masthead">
-  <a class="logoimg" href="index.html"><img src="img/logo.png?v=6" alt="Cinderrealm — World of Dunmere"></a>
-  <nav class="bar">
-    <a href="index.html">Home</a><a href="world.html" class="active">World</a><a href="hiscores.html">Hiscores</a>
-    <a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a>
-  </nav>
+  <a class="logoimg" href="index.html" title="Back to the homepage"><img src="img/logo.png?v=7" alt="Cinderrealm — World of Dunmere"></a>
+  <nav class="bar"><a href="index.html">Home</a><a href="index.html#chronicles">Chronicles</a><a href="world.html" class="active">World</a><a href="world.html#endgame">Endgame</a><a href="community.html">Community</a><a href="hiscores.html">Hiscores</a><a href="tradekeep.html">Tradekeep</a><a href="forums.html">Forums</a><a href="polls.html">Polls</a><a href="donate.html">Donate</a><a href="rules.html">Rules</a></nav>
+  <a class="btn loginbtn" href="login.html">Login</a>
 </div>
 <div class="loginrow"><span data-login-ui style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span><span class="status" id="login-status"></span></div>
 <div class="wrap">
@@ -41,10 +39,10 @@
   <div class="panel">
     <h2>Regions of Dunmere</h2>
     <div class="body">
-      <p class="status" style="text-align:center"><i>A fresh chart of the realm is being drawn — check back soon.</i></p>
+      <img class="worldmap" src="img/dunmere-map.svg" alt="Chart of Dunmere — Saltmere Isle, Emberhold, Ironspire City, Kilnmarch, the Gloamfen and the Outlands">
       <div class="skillgrid">
         <div class="skillcard"><span class="skillicon"><img src="img/icons/town-anchor.svg" alt="Saltmere Isle"></span><div><h3>Starter Location</h3><p>The starter location on Saltmere Isle, off the west coast near Whiteguard Keep. Every hero's journey begins here — learn the basics, then the wizard sends you to the mainland.</p></div></div>
-        <div class="skillcard"><span class="skillicon"><img src="img/icons/town-waves.svg" alt="Gullrock"></span><div><h3>Gullrock</h3><p>A bare, cliff-girt isle in the eastern sea, off Kilnmarch's point, reached by ferry. Glass is worked here like nowhere else — glass weapons, glass shards, and the Cindermantle are Gullrock's alone.</p></div></div>
+        <div class="skillcard"><span class="skillicon"><img src="img/icons/town-waves.svg" alt="Gullrock"></span><div><h3>Gullrock</h3><p>A bare, cliff-girt isle in the western sea, reached by ferry. Glass is worked here like nowhere else — glass weapons, glass shards, and the Cindermantle are Gullrock's alone.</p></div></div>
         <div class="skillcard"><span class="skillicon"><img src="img/icons/town-home.svg" alt="Emberfield"></span><div><h3>Emberfield</h3><p>The beating heart of the realm — central market town. Monsters roam the wilds beyond, but no hero hunts another here.</p></div></div>
         <div class="skillcard"><span class="skillicon"><img src="img/icons/town-store.svg" alt="Ironspire City"></span><div><h3>Ironspire City</h3><p>Great city east of Emberfield. The First Tradekeep and the Admin Crown Guard.</p></div></div>
         <div class="skillcard"><span class="skillicon"><img src="img/icons/town-castle.svg" alt="Emberhold"></span><div><h3>Emberhold</h3><p>Old stone town west of Ironspire City, on the road to Kilnmarch.</p></div></div>
@@ -76,6 +74,19 @@
         <div class="skillcard"><span class="skillicon"><img src="img/icons/town-dungeon.svg?v=2" alt="The Frostmaw Deep"></span><div><h3>The Frostmaw Deep</h3><p>Beneath the Frosthollow Hills — a frozen delve where the cold bites back.</p></div></div>
         <div class="skillcard"><span class="skillicon"><img src="img/icons/town-dungeon.svg?v=2" alt="The Ashen Depths"></span><div><h3>The Ashen Depths</h3><p>A party delve in the far northern Outlands, sealed by an anvil keystone: the Cooling Gallery, the Ashen Sentinel, and the Unbound Emberlord. The gate asks 70 Attack, 70 Strength and 25 quest points — bring a party, or go alone and mean it.</p></div></div>
       </div>
+    </div>
+  </div>
+
+  <div class="panel" id="endgame">
+    <h2>Beyond the Journey — Endgame</h2>
+    <div class="body">
+      <div class="endgrid">
+        <div class="endcard"><div class="num">30</div><h3>The Crucible</h3><p>Thirty waves of escalating endurance combat — and Vesskar at the end.</p></div>
+        <div class="endcard"><div class="num">Party</div><h3>Ashen Depths</h3><p>A party dungeon in the far north. Safe death. Face the Unbound Emberlord.</p></div>
+        <div class="endcard"><div class="num">PvP</div><h3>Ashfall Arena</h3><p>Coin-staked duels, free-for-all battles and a rewards shop, kept by Corvane.</p></div>
+        <div class="endcard"><div class="num">483</div><h3>Tradekeep</h3><p>A player-to-player marketplace with live guide prices — <a href="tradekeep.html">browse the Tradekeep</a>.</p></div>
+      </div>
+      <div class="planned"><span class="pill">Planned</span><strong>War of the Hearth</strong><span>Capture-the-standard minigame</span><span class="pill">In development</span><strong>Emberseal Defence</strong><span>Portal-defence minigame</span></div>
     </div>
   </div>
   <div class="panel">
@@ -113,5 +124,6 @@
 </footer>
 <script src="js/common.js?v=9"></script>
 <script src="js/embers.js?v=2"></script>
+<div class="mobile-play"><a href="https://cinderrealm.onrender.com" target="_blank" rel="noopener">Enter Dunmere — Play Free</a></div>
 </body>
 </html>
