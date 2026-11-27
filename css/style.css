@@ -378,3 +378,14 @@ textarea.forum { min-height: 140px; resize: vertical; }
   .stat { padding: 15px; }
   .stat strong { font-size: 24px; }
 }
+
+/* ---- v20: single top line (Jacob, 2026-11-27) ----
+   Top strip and login row are gone. The masthead is the only header line:
+   logo (home), nav / hamburger, then the account area — the profile chip
+   when signed in, the Login button when not. */
+.mast-profile { display: flex; align-items: center; margin-left: auto; }
+.mast-profile:empty { display: none; }
+.mast-profile .btn { display: none; } /* common.js renders Log In / Create Account here when signed out; the masthead Login button covers it */
+.masthead .loginbtn { margin-left: auto; }
+.mast-profile:not(:empty) + .loginbtn { margin-left: 0; }
+@media (max-width: 900px) { .mast-profile { margin-left: 0; } }
