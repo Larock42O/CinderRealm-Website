@@ -347,3 +347,34 @@ textarea.forum, input.forum {
 }
 textarea.forum:focus, input.forum:focus { outline: none; border-color: var(--gold-hi); }
 textarea.forum { min-height: 140px; resize: vertical; }
+
+/* ---- v19 mobile fixes (Jacob's phone report, 2026-11-27) ----
+   The v18 header stacked the full desktop nav on phones, and the fixed
+   ember canvas + vignette layers made iOS scrolling smear/ghost.
+   Mobile now gets: hamburger nav (as in the approved prototype),
+   a one-line top strip, and the heavy fixed layers switched off. */
+.menu-btn { display: none; background: transparent; border: 1px solid var(--line); color: var(--parch);
+  font-size: 19px; line-height: 1; padding: 8px 13px; cursor: pointer; border-radius: 3px; }
+@media (max-width: 900px) {
+  .menu-btn { display: block; margin-left: auto; }
+  .masthead { gap: 10px; padding: 10px 14px; }
+  .masthead .logoimg img { height: 36px; }
+  .masthead .loginbtn { margin-left: 0; padding: 8px 14px; font-size: 11px; }
+  .masthead nav.bar { display: none; width: 100%; margin: 6px 0 2px; }
+  .masthead nav.bar.open { display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 0; }
+  .masthead nav.bar a { padding: 11px; border-top: 1px solid var(--line); font-size: 14px; }
+}
+@media (max-width: 760px) {
+  .topstrip > span:first-child { display: none; }
+  .topstrip { justify-content: flex-end; }
+  body::after { display: none; }
+  #ember-bg { display: none; }
+  .hero2 { padding: 30px 16px; gap: 22px; }
+  .hero2 h1 { font-size: 33px; }
+  .hero2 .hero-art img { max-width: 340px; }
+  .mobile-play a { font-size: 12px; letter-spacing: .05em; text-align: left; padding-left: 16px; }
+  .newsitem .thumb { width: 54px; height: 46px; font-size: 19px; }
+  .ticker-track { animation-duration: 70s; }
+  .stat { padding: 15px; }
+  .stat strong { font-size: 24px; }
+}
